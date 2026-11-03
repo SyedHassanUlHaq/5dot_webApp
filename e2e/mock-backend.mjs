@@ -31,7 +31,67 @@ function issue() {
   return t;
 }
 
+// ── scans: progress is derived from elapsed time so polling is deterministic ──
+const SCAN_MS = Number(process.env.SCAN_MS ?? 4000);
+const scans = new Map();
+let sn = 0;
+function viewScan(sc) {
+  const t = Date.now() - sc.t0;
+  const pct = Math.min(100, Math.round((t / SCAN_MS) * 100));
+  const done = pct >= 100;
+  const detections = {};
+  const resultData = {};
+  const kinds = sc.kinds;
+  kinds.forEach((k, i) => {
+    const kDone = pct >= Math.min(100, 50 + (i + 1) * (50 / kinds.length));
+    detections[k] = {
+      requested: true,
+      status: kDone || done ? 'complete' : pct > 10 ? 'processing' : 'pending',
+    };
+    if (done || kDone) resultData[k] = { score: sc.scores[k] ?? 0.82, threshold: 0.5 };
+  });
+  return {
+    requestId: sc.id,
+    filename: sc.filename,
+    status: done ? 'complete' : 'processing',
+    progress: pct,
+    detections,
+    resultData: Object.keys(resultData).length ? resultData : null,
+    errorMessage: null,
+    createdAt: new Date(sc.t0).toISOString(),
+    completedAt: done ? new Date(sc.t0 + SCAN_MS).toISOString() : null,
+    chunks: done
+      ? [0, 1, 2].map((i) => ({
+          chunkIndex: i,
+          segmentStart: i * 5,
+          segmentEnd: i * 5 + 5,
+          aiAudioScore: 0.3 + i * 0.2,
+          aiVideoScore: 0.6 + i * 0.1,
+          lipsyncScore: 0.2,
+          changesPoints: null,
+        }))
+      : [],
+  };
+}
+const KIND_FIELDS = {
+  detectAiAudio: 'ai_audio',
+  detectAiVideo: 'ai_video',
+  detectLipsync: 'lipsync',
+};
+
 const server = createServer(async (req, res) => {
+  // CORS: the browser uploads files straight to the backend (see docs), so mirror the real API's behaviour.
+  const origin = req.headers.origin;
+  if (origin) {
+    res.setHeader('access-control-allow-origin', origin);
+    res.setHeader('access-control-allow-credentials', 'true');
+    res.setHeader('access-control-allow-headers', 'authorization,content-type');
+    res.setHeader('access-control-allow-methods', 'DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT');
+  }
+  if (req.method === 'OPTIONS') {
+    res.writeHead(200);
+    return res.end();
+  }
   const chunks = [];
   for await (const c of req) chunks.push(c);
   const raw = Buffer.concat(chunks).toString();
@@ -77,6 +137,60 @@ const server = createServer(async (req, res) => {
   if (path === '/users/me' && req.method === 'GET')
     return authed() ? send(200, user) : send(401, { detail: 'Not authenticated' });
   if (path === '/plans') return send(200, { plans: [] });
+  if (req.method === 'POST' && path === '/scans') {
+    if (!authed()) return send(401, { detail: 'Not authenticated' });
+    if (user.scansUsedThisMonth >= (user.scansLimitThisMonth ?? Infinity))
+      return send(429, {
+        error: {
+          code: 'SCAN_LIMIT_REACHED',
+          message: 'Monthly scan limit reached.',
+          statusCode: 429,
+        },
+      });
+    const kinds = Object.entries(KIND_FIELDS)
+      .filter(([f]) => new RegExp(`name="${f}"\\r\\n\\r\\ntrue`).test(raw))
+      .map(([, k]) => k);
+    const fname = /filename="([^"]+)"/.exec(raw)?.[1];
+    const urlv = /name="url"\r\n\r\n([^\r]+)/.exec(raw)?.[1];
+    const sc = {
+      id: `s_${++sn}`,
+      t0: Date.now(),
+      kinds: kinds.length ? kinds : ['ai_video'],
+      scores: {},
+      filename: encodeURIComponent(fname ?? urlv ?? 'upload'),
+    };
+    scans.set(sc.id, sc);
+    user.scansUsedThisMonth++;
+    return send(200, viewScan(sc));
+  }
+  if (path === '/scans/history') {
+    const items = [...scans.values()].reverse().map(viewScan);
+    return authed()
+      ? send(200, { items, total: items.length, limit: 20, offset: 0, hasMore: false })
+      : send(401, { detail: 'Not authenticated' });
+  }
+  if (path === '/scans/trending') return send(200, { items: [] });
+  if (path === '/stats/weekly')
+    return send(200, {
+      totalScans: scans.size,
+      flaggedScans: scans.size,
+      dailyBreakdown: [0, 1, 0, 2, 0, 0, scans.size].map((n, i) => ({ day: String(i), scans: n })),
+    });
+  const rep = /^\/scans\/([^/]+)\/report\.pdf$/.exec(path);
+  if (rep && scans.has(rep[1])) {
+    res.writeHead(200, {
+      'content-type': 'application/pdf',
+      'content-disposition': 'attachment; filename="report.pdf"',
+    });
+    return res.end('%PDF-1.4 mock');
+  }
+  const one = /^\/scans\/([^/]+)$/.exec(path);
+  if (one && req.method === 'GET')
+    return !authed()
+      ? send(401, { detail: 'Not authenticated' })
+      : scans.has(one[1])
+        ? send(200, viewScan(scans.get(one[1])))
+        : send(404, { detail: 'Scan not found' });
   send(404, { detail: 'Not Found' });
 });
 server.listen(PORT, () => console.log(`mock backend on :${PORT}`));

@@ -6,6 +6,7 @@ import { AuthResponseSchema, MessageSchema } from '@/lib/api/schemas';
 import { apiBase } from './env';
 import { checkOrigin, clientIp, jsonError, rateLimit } from './guards';
 import { clearSession, RT_COOKIE, setSession } from './session';
+import { handleUploadToken } from './upload-token';
 
 const email = z.string().trim().min(1).max(254);
 const otp = z.string().trim().length(6);
@@ -79,6 +80,7 @@ export async function handleAuth(req: NextRequest, action: string): Promise<Next
 
   try {
     if (action === 'signout') return await signout(req);
+    if (action === 'upload-token') return await handleUploadToken(req);
     if (!isAction(action)) return jsonError(new ApiError('NOT_FOUND', 'Not found.', 404));
 
     const limited = rateLimit(`${action}:${clientIp(req)}`, 10, 60_000);

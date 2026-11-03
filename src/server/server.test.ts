@@ -279,3 +279,40 @@ describe('proxy', () => {
     expect(res.status).toBe(204);
   });
 });
+
+describe('upload-token', () => {
+  it('requires a same-origin POST', async () => {
+    const res = await handleAuth(
+      req('/api/auth/upload-token', {
+        method: 'POST',
+        origin: 'https://evil.com',
+        cookies: '5dot_rt=R; 5dot_at=A',
+      }),
+      'upload-token',
+    );
+    expect(res.status).toBe(403);
+  });
+  it('returns the current access token with no-store and does not touch the backend', async () => {
+    const res = await handleAuth(
+      req('/api/auth/upload-token', { method: 'POST', cookies: '5dot_rt=R; 5dot_at=AT_NOW' }),
+      'upload-token',
+    );
+    expect(res.status).toBe(200);
+    expect(res.headers.get('cache-control')).toBe('no-store');
+    expect(await res.json()).toEqual({ accessToken: 'AT_NOW' });
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+  it('refreshes when the access cookie is gone and rotates cookies', async () => {
+    fetchMock.mockResolvedValueOnce(j({ accessToken: 'NEW_AT', refreshToken: 'NEW_RT' }));
+    const res = await handleAuth(
+      req('/api/auth/upload-token', { method: 'POST', cookies: '5dot_rt=R_upl' }),
+      'upload-token',
+    );
+    expect((await res.json()).accessToken).toBe('NEW_AT');
+    expect(setCookies(res).join('\n')).toMatch(/5dot_rt=NEW_RT/);
+  });
+  it('401 SESSION_EXPIRED without a session', async () => {
+    const res = await handleAuth(req('/api/auth/upload-token', { method: 'POST' }), 'upload-token');
+    expect(res.status).toBe(401);
+  });
+});

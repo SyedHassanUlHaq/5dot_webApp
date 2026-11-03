@@ -1,5 +1,6 @@
 /** Zod schemas for backend responses. Shapes come from faikNew/src/services/*.ts (not BACKEND_SPEC.md). */
 import { z } from 'zod';
+import { safeDecodeFilename } from '@/lib/scan/format';
 
 export const PlanId = z.enum(['free', 'pro', 'team']);
 
@@ -48,7 +49,8 @@ export const ScanChunkSchema = z.object({
 
 export const ScanResponseSchema = z.object({
   requestId: z.string(),
-  filename: z.string(),
+  // Single choke point: every scan has a clean, human-readable filename (same as mobile decodeResponse).
+  filename: z.string().transform(safeDecodeFilename),
   status: z.enum(['processing', 'complete', 'failed']),
   progress: z.number(),
   detections: z.partialRecord(DetectionKind, DetectionState),
@@ -60,14 +62,38 @@ export const ScanResponseSchema = z.object({
 });
 export type ScanResponse = z.infer<typeof ScanResponseSchema>;
 
-export const ScanHistorySchema = z.object({
+const ScanHistoryEnvelope = z.object({
   items: z.array(ScanResponseSchema),
   total: z.number(),
   limit: z.number(),
   offset: z.number(),
   hasMore: z.boolean(),
 });
-export type ScanHistory = z.infer<typeof ScanHistorySchema>;
+export type ScanHistory = z.infer<typeof ScanHistoryEnvelope>;
+/** The endpoint's schema wasn't published when mobile shipped; mobile tolerates a bare array, so do we. */
+export const ScanHistorySchema = z
+  .union([ScanHistoryEnvelope, z.array(ScanResponseSchema)])
+  .transform((d): ScanHistory =>
+    Array.isArray(d)
+      ? { items: d, total: d.length, limit: d.length, offset: 0, hasMore: false }
+      : d,
+  );
+
+export const TrendingItemSchema = z.object({
+  url: z.string(),
+  scanCount: z.number().nullable(),
+  score: z.number().nullable(),
+  verdict: z.enum(['ai', 'authentic', 'tampered']).nullable(),
+  youtube: z.object({
+    title: z.string(),
+    channelTitle: z.string(),
+    thumbnailUrl: z.string(),
+    viewCount: z.number().nullable(),
+    likeCount: z.number().nullable(),
+  }),
+});
+export const TrendingSchema = z.object({ items: z.array(TrendingItemSchema) });
+export type TrendingItem = z.infer<typeof TrendingItemSchema>;
 
 export const PlanSchema = z.object({
   id: PlanId,

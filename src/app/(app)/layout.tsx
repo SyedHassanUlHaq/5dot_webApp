@@ -3,6 +3,7 @@ import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
+import { AppShell } from '@/components/shell/AppShell';
 import { useMe, useTerms } from '@/lib/auth/session';
 
 /** Guards the signed-in area: loads the user, enforces the terms gate. App shell/nav arrives with the scan milestone. */
@@ -30,5 +31,5 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       </main>
     );
   }
-  return <>{children}</>;
+  return <AppShell>{children}</AppShell>;
 }
