@@ -1,6 +1,67 @@
 @import 'tailwindcss';
 
+/* Mirrors mobile constants (colors.ts / spacing.ts / typography.ts) — see src/styles/tokens.ts. */
+@theme {
+  --color-brand: #c0376b;
+  --color-brand-dark: #922b52;
+  --color-ai: #d94060;
+  --color-authentic: #52a87c;
+  --color-authentic-dark: #2b7a54;
+  --color-tamper: #e09020;
+  --color-tamper-dark: #c07018;
+  --color-video: #7c3aed;
+  --color-audio: #c44070;
+  --color-bg: #f2f2f7;
+  --color-surface: #ffffff;
+  --color-ink: #000000;
+  --color-ink-2: #6b7280;
+  --color-ink-3: #9ca3af;
+  --color-line: #e5e7eb;
+  --color-gray-100: #f3f4f6;
+  --color-gray-200: #e5e7eb;
+  --color-gray-300: #d1d5db;
+  --color-gray-700: #374151;
+  --color-gray-900: #111827;
+  --color-action-green: #3f7d0b; /* web deviation: AA-safe version of mobile #84CC16 */
+
+  /* Spacing scale: 4 8 12 16 20 24 32 40 48 */
+  --spacing: 4px;
+
+  --radius-card: 14px;
+  --radius-input: 12px;
+  --radius-pill: 50px;
+
+  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+
+  --text-display: 36px;
+  --text-h1: 28px;
+  --text-h2: 22px;
+  --text-h3: 18px;
+  --text-body: 15px;
+  --text-caption: 12px;
+  --text-label: 11px;
+}
+
+html {
+  color-scheme: light; /* mobile is light-only */
+}
 body {
-  background: #f2f2f7;
-  color: #000;
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: var(--text-body);
+  -webkit-font-smoothing: antialiased;
+}
+:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
