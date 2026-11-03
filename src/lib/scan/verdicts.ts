@@ -15,8 +15,16 @@ import type { DetectionKind } from '@/lib/api/schemas';
 export type VerdictLevel = 'clear' | 'close_clear' | 'close_flagged' | 'flagged';
 export const CLOSE_CALL_MARGIN = 0.1;
 
+/**
+ * score − threshold, rounded to 9 decimals. Plain subtraction leaves float noise (0.6 − 0.5 = 0.0999…, 0.6 − 0.7 = −0.0999…),
+ * which put a score EXACTLY CLOSE_CALL_MARGIN from its threshold in the wrong level. Same fix as mobile (faikNew/src/constants/verdicts.ts).
+ */
+export function marginOf(score: number, threshold: number): number {
+  return Math.round((score - threshold) * 1e9) / 1e9;
+}
+
 export function verdictLevelFor(score: number, threshold: number): VerdictLevel {
-  const margin = score - threshold;
+  const margin = marginOf(score, threshold);
   if (margin >= CLOSE_CALL_MARGIN) return 'flagged';
   if (margin >= 0) return 'close_flagged';
   if (margin > -CLOSE_CALL_MARGIN) return 'close_clear';

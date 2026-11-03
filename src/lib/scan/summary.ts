@@ -1,7 +1,7 @@
 /** Port of faikNew/src/utils/scanSummary.ts. */
 import type { DetectionKind, ScanResponse } from '@/lib/api/schemas';
 import { DETECTION_KINDS } from './meta';
-import { verdictLevelFor, type VerdictLevel } from './verdicts';
+import { marginOf, verdictLevelFor, type VerdictLevel } from './verdicts';
 
 type Chunk = NonNullable<ScanResponse['chunks']>[number];
 const CHUNK_FIELD: Record<DetectionKind, 'aiAudioScore' | 'aiVideoScore' | 'lipsyncScore'> = {
@@ -61,7 +61,7 @@ export function summarizeScan(
       thresholdPct: result ? Math.round(threshold * 100) : null,
       flagged: result ? result.score >= threshold : null,
       level: result ? verdictLevelFor(result.score, threshold) : null,
-      margin: result ? result.score - threshold : null,
+      margin: result ? marginOf(result.score, threshold) : null,
     };
   });
 

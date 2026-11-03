@@ -3,7 +3,7 @@ import type { ScanResponse } from '@/lib/api/schemas';
 import { formatDuration, safeDecodeFilename, timeAgo } from './format';
 import { chunkScoresFor, isScanDone, summarizeScan } from './summary';
 import { validateFile, validateUrl } from './validate';
-import { verdictLevelFor } from './verdicts';
+import { marginOf, verdictLevelFor } from './verdicts';
 
 const base: ScanResponse = {
   requestId: 'r1',
@@ -32,6 +32,34 @@ describe('verdictLevelFor (relative to own threshold)', () => {
   ])('score %s thr %s → %s', (s, t, level) => expect(verdictLevelFor(s, t)).toBe(level));
 });
 
+describe('verdictLevelFor at exactly ±10 points (float-noise regression)', () => {
+  // Every threshold from 0.00 to 1.00 in 0.01 steps: a score exactly 10 points above must be flagged,
+  // exactly 10 below must be clear, equal must be close_flagged, and the 9-point neighbours stay "close".
+  const r = (x: number) => Math.round(x * 100) / 100;
+  const thresholds = Array.from({ length: 101 }, (_, i) => i / 100);
+  it('exactly +10 points is flagged (was close_flagged for e.g. 0.6 vs 0.5)', () => {
+    for (const t of thresholds)
+      if (r(t + 0.1) <= 1) expect(verdictLevelFor(r(t + 0.1), t), `t=${t}`).toBe('flagged');
+  });
+  it('exactly -10 points is clear (was close_clear for e.g. 0.6 vs 0.7)', () => {
+    for (const t of thresholds)
+      if (r(t - 0.1) >= 0) expect(verdictLevelFor(r(t - 0.1), t), `t=${t}`).toBe('clear');
+  });
+  it('equal is close_flagged; 9 points either side stays a close call', () => {
+    for (const t of thresholds) {
+      expect(verdictLevelFor(t, t), `t=${t}`).toBe('close_flagged');
+      if (r(t + 0.09) <= 1) expect(verdictLevelFor(r(t + 0.09), t), `t=${t}`).toBe('close_flagged');
+      if (r(t - 0.09) >= 0) expect(verdictLevelFor(r(t - 0.09), t), `t=${t}`).toBe('close_clear');
+    }
+  });
+  it('marginOf removes float noise but keeps real differences', () => {
+    expect(marginOf(0.6, 0.5)).toBe(0.1);
+    expect(marginOf(0.6, 0.7)).toBe(-0.1);
+    expect(marginOf(0.5, 0.5)).toBe(0);
+    expect(marginOf(0.123456, 0.1)).toBeCloseTo(0.023456, 9);
+  });
+});
+
 describe('summarizeScan', () => {
   it('headline is the check furthest past its own threshold, not highest raw score', () => {
     const s = summarizeScan({
@@ -44,6 +72,18 @@ describe('summarizeScan', () => {
     expect(s.headline?.kind).toBe('lipsync');
     expect(s.anyFlagged).toBe(true);
     expect(s.detections.find((d) => d.kind === 'ai_video')?.level).toBe('clear');
+  });
+  it('a score exactly 10 points over its threshold reads as flagged in the summary too', () => {
+    const s = summarizeScan({
+      ...base,
+      resultData: {
+        ai_video: { score: 0.6, threshold: 0.5 },
+        lipsync: { score: 0.6, threshold: 0.7 },
+      },
+    });
+    expect(s.detections.find((d) => d.kind === 'ai_video')?.level).toBe('flagged');
+    expect(s.detections.find((d) => d.kind === 'lipsync')?.level).toBe('clear');
+    expect(s.headline?.kind).toBe('ai_video');
   });
   it('defaults a missing threshold to 0.5', () => {
     const s = summarizeScan({ ...base, resultData: { ai_video: { score: 0.8 } as never } });

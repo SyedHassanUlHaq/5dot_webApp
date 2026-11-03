@@ -60,7 +60,7 @@ token. `NEXT_PUBLIC_UPLOAD_MODE=proxy` streams through the BFF instead (self-hos
 
 Ported verbatim from mobile (`src/lib/scan/verdicts.ts`, `summary.ts`): a score is judged against **its own threshold**;
 within ±0.10 is a “close call”; the headline is the check furthest past its own threshold. Same input ⇒ same verdict on web and mobile.
-Known quirk inherited from mobile: a margin of _exactly_ 0.10 can land one level lower because of floating point (`0.6 − 0.5 = 0.0999…`).
+The margin is computed once by `marginOf()` (rounded to 9 decimals) and shared by the level and the headline ranking, so a score exactly ±0.10 from its threshold lands in the right level (plain subtraction gives `0.6 − 0.5 = 0.0999…`). The same fix is in mobile (`src/constants/verdicts.ts`, `src/utils/scanSummary.ts`); a regression test sweeps every threshold 0.00–1.00.
 
 ## Design system
 
