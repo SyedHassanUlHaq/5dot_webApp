@@ -1,3 +1,4 @@
+import '@/lib/zod-config';
 import { z } from 'zod';
 
 /** Client-side form schemas. Messages mirror mobile's validation copy. */

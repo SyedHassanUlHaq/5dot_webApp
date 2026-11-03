@@ -31,6 +31,8 @@ export const Colors = {
   gray900: '#111827',
   // WEB DEVIATION: mobile's green button is #84CC16, which fails AA with white text (~1.9:1).
   greenAction: '#3F7D0B',
+  // WEB DEVIATION: mobile textSecondary (#6B7280) is ~4.4:1 on the #F2F2F7 page background; the web uses this (~5.2:1) for secondary text.
+  textSecondaryWeb: '#5F6673',
 } as const;
 
 /** px — same scale as mobile Spacing. */

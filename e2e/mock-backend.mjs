@@ -136,16 +136,88 @@ const server = createServer(async (req, res) => {
   if (req.method === 'POST' && path === '/auth/signout') return send(200, { message: 'ok' });
   if (path === '/users/me' && req.method === 'GET')
     return authed() ? send(200, user) : send(401, { detail: 'Not authenticated' });
-  if (path === '/plans') return send(200, { plans: [
-    { id: 'free', name: 'Free', price: 0, currency: 'USD', billingPeriod: 'forever', scansPerMonth: 50, features: ['Audio + video AI detection'], priorityQueue: false, apiAccess: false },
-    { id: 'pro', name: 'Pro', price: 9, currency: 'USD', billingPeriod: 'month', scansPerMonth: 500, features: ['Lip-sync detection'], priorityQueue: true, apiAccess: false, trialDays: 7 },
-    { id: 'team', name: 'Team', price: 24, currency: 'USD', billingPeriod: 'month', scansPerMonth: null, features: ['Seats'], priorityQueue: true, apiAccess: true, seats: 5 } ] });
-  if (path === '/users/me' && req.method === 'PATCH') { if (!authed()) return send(401, { detail: 'Not authenticated' }); Object.assign(user, body); return send(200, user); }
-  if (path === '/users/me' && req.method === 'DELETE') return authed() ? send(204) : send(401, { detail: 'Not authenticated' });
-  if (path === '/users/me/deactivate' && req.method === 'POST') return authed() ? send(204) : send(401, { detail: 'Not authenticated' });
-  if (path === '/feedback' && req.method === 'POST') return authed() ? send(200, { feedbackId: 'f_1', message: 'Thanks' }) : send(401, { detail: 'Not authenticated' });
-  if (path === '/notifications' && req.method === 'GET') return send(200, { items: [{ id: 'n1', template: 'scan_complete_ai', title: 'Scan finished', body: 'clip.mp4 looks AI-made', data: {}, read: false, createdAt: new Date().toISOString() }], total: 1, unread: 1, page: 1, limit: 50, hasMore: false });
-  if (/^\/notifications\/[^/]+\/read$/.test(path) && req.method === 'PATCH') return send(200, { id: 'n1', template: 'scan_complete_ai', title: 'Scan finished', body: 'x', data: {}, read: true, createdAt: new Date().toISOString() });
+  if (path === '/plans')
+    return send(200, {
+      plans: [
+        {
+          id: 'free',
+          name: 'Free',
+          price: 0,
+          currency: 'USD',
+          billingPeriod: 'forever',
+          scansPerMonth: 50,
+          features: ['Audio + video AI detection'],
+          priorityQueue: false,
+          apiAccess: false,
+        },
+        {
+          id: 'pro',
+          name: 'Pro',
+          price: 9,
+          currency: 'USD',
+          billingPeriod: 'month',
+          scansPerMonth: 500,
+          features: ['Lip-sync detection'],
+          priorityQueue: true,
+          apiAccess: false,
+          trialDays: 7,
+        },
+        {
+          id: 'team',
+          name: 'Team',
+          price: 24,
+          currency: 'USD',
+          billingPeriod: 'month',
+          scansPerMonth: null,
+          features: ['Seats'],
+          priorityQueue: true,
+          apiAccess: true,
+          seats: 5,
+        },
+      ],
+    });
+  if (path === '/users/me' && req.method === 'PATCH') {
+    if (!authed()) return send(401, { detail: 'Not authenticated' });
+    Object.assign(user, body);
+    return send(200, user);
+  }
+  if (path === '/users/me' && req.method === 'DELETE')
+    return authed() ? send(204) : send(401, { detail: 'Not authenticated' });
+  if (path === '/users/me/deactivate' && req.method === 'POST')
+    return authed() ? send(204) : send(401, { detail: 'Not authenticated' });
+  if (path === '/feedback' && req.method === 'POST')
+    return authed()
+      ? send(200, { feedbackId: 'f_1', message: 'Thanks' })
+      : send(401, { detail: 'Not authenticated' });
+  if (path === '/notifications' && req.method === 'GET')
+    return send(200, {
+      items: [
+        {
+          id: 'n1',
+          template: 'scan_complete_ai',
+          title: 'Scan finished',
+          body: 'clip.mp4 looks AI-made',
+          data: {},
+          read: false,
+          createdAt: new Date().toISOString(),
+        },
+      ],
+      total: 1,
+      unread: 1,
+      page: 1,
+      limit: 50,
+      hasMore: false,
+    });
+  if (/^\/notifications\/[^/]+\/read$/.test(path) && req.method === 'PATCH')
+    return send(200, {
+      id: 'n1',
+      template: 'scan_complete_ai',
+      title: 'Scan finished',
+      body: 'x',
+      data: {},
+      read: true,
+      createdAt: new Date().toISOString(),
+    });
   if (req.method === 'POST' && path === '/scans') {
     if (!authed()) return send(401, { detail: 'Not authenticated' });
     if (user.scansUsedThisMonth >= (user.scansLimitThisMonth ?? Infinity))

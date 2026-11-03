@@ -1,9 +1,18 @@
 import type { NextConfig } from 'next';
+import { BASE_SECURITY_HEADERS, HSTS } from './src/lib/csp';
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
-  // Security headers + CSP are added in the hardening milestone.
+  productionBrowserSourceMaps: false,
+  async headers() {
+    // The Content-Security-Policy (with a per-request nonce) is set in src/middleware.ts.
+    const headers = [
+      ...BASE_SECURITY_HEADERS,
+      ...(process.env.NODE_ENV === 'production' ? [HSTS] : []),
+    ];
+    return [{ source: '/:path*', headers }];
+  },
 };
 
 export default nextConfig;

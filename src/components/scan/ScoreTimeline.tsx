@@ -53,7 +53,7 @@ export function ScoreTimeline({ series }: { series: TimelineSeries[] }) {
       >
         Score over time
       </h3>
-      <p className="mb-2 text-caption text-ink-3">Per-segment breakdown from the raw analysis</p>
+      <p className="mb-2 text-caption text-ink-2">Per-segment breakdown from the raw analysis</p>
       <div ref={wrap}>
         {w > 0 && (
           <svg

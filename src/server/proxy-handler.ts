@@ -2,7 +2,7 @@ import 'server-only';
 import { NextResponse, type NextRequest } from 'next/server';
 import { ApiError } from '@/lib/api/errors';
 import { apiBase } from './env';
-import { checkOrigin, jsonError } from './guards';
+import { checkOrigin, clientIp, jsonError, rateLimit } from './guards';
 import { refreshTokens } from './refresh';
 import { AT_COOKIE, clearSession, RT_COOKIE, setSession } from './session';
 import type { Tokens } from '@/lib/api/schemas';
@@ -37,6 +37,9 @@ export async function handleProxy(req: NextRequest, segments: string[]): Promise
     const csrf = checkOrigin(req);
     if (csrf) return jsonError(csrf);
   }
+  // Generous per-IP ceiling (polling + normal use stay far below it); stops scripted abuse of the proxy.
+  const limited = rateLimit(`proxy:${clientIp(req)}`, 600, 60_000);
+  if (limited) return jsonError(limited);
   if (!isAllowedPath(segments)) return jsonError(new ApiError('NOT_FOUND', 'Not found.', 404));
 
   const rt = req.cookies.get(RT_COOKIE)?.value;

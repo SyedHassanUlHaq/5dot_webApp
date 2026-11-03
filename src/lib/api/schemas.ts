@@ -1,4 +1,5 @@
 /** Zod schemas for backend responses. Shapes come from faikNew/src/services/*.ts (not BACKEND_SPEC.md). */
+import '@/lib/zod-config';
 import { z } from 'zod';
 import { safeDecodeFilename } from '@/lib/scan/format';
 

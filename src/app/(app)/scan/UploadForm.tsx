@@ -246,6 +246,7 @@ export function UploadForm() {
                 ref={input}
                 type="file"
                 className="sr-only"
+                aria-label="Choose a file to analyze"
                 tabIndex={-1}
                 accept={allowedExtensions(kinds)
                   .map((e) => `.${e}`)

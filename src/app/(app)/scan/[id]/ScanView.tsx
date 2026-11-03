@@ -1,6 +1,8 @@
 'use client';
 import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { ApiError } from '@/lib/api/errors';
+import { Button } from '@/components/ui/Button';
 import { ErrorModal } from '@/components/ErrorModal';
 import { useScan } from '@/lib/scan/hooks';
 import { isScanDone } from '@/lib/scan/summary';
@@ -23,11 +25,30 @@ export function ScanView({ id }: { id: string }) {
     );
   }
   if (!scan) {
+    // Definitive answers (404/403…) end here; anything else (offline, 5xx) is transient. Polling keeps retrying, so offer a manual retry too.
+    const definitive =
+      error instanceof ApiError &&
+      error.statusCode >= 400 &&
+      error.statusCode < 500 &&
+      error.statusCode !== 429;
+    if (!definitive) {
+      return (
+        <div role="alert" className="mx-auto max-w-sm py-20 text-center">
+          <p className="mb-1 font-semibold">Couldn&apos;t reach the server</p>
+          <p className="mb-4 text-ink-2">
+            {error?.message ?? 'Please check your connection.'} We&apos;ll keep trying.
+          </p>
+          <Button variant="outline" onClick={() => void refetch()}>
+            Try now
+          </Button>
+        </div>
+      );
+    }
     return (
       <ErrorModal
         open
         title={
-          error && 'statusCode' in error && error.statusCode === 404
+          error instanceof ApiError && error.statusCode === 404
             ? 'Not found'
             : 'Could not load result'
         }

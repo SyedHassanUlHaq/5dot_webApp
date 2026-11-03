@@ -14,7 +14,7 @@
   --color-bg: #f2f2f7;
   --color-surface: #ffffff;
   --color-ink: #000000;
-  --color-ink-2: #6b7280;
+  --color-ink-2: #5f6673; /* web deviation: mobile #6B7280 is ~4.4:1 on the #F2F2F7 page background (< WCAG AA 4.5:1) */
   --color-ink-3: #9ca3af;
   --color-line: #e5e7eb;
   --color-gray-100: #f3f4f6;

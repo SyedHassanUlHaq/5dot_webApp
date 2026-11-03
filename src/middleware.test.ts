@@ -44,3 +44,23 @@ describe('middleware', () => {
   it('lets signed-in users view legal pages', () =>
     expect(location(run('/legal/terms', true))).toBeNull());
 });
+
+describe('CSP', () => {
+  const csp = (path: string) => run(path, true).headers.get('content-security-policy') ?? '';
+  it('every app page gets a nonce-based policy', () => {
+    const c = csp('/history');
+    expect(c).toMatch(/script-src [^;]*'nonce-[A-Za-z0-9+/=]+'/);
+    expect(c).not.toMatch(/script-src [^;]*'unsafe-inline'/);
+  });
+  it('uses a fresh nonce per request', () => {
+    const n = (c: string) => /'nonce-([^']+)'/.exec(c)?.[1];
+    expect(n(csp('/history'))).not.toBe(n(csp('/history')));
+  });
+  it('the verbatim legal HTML pages get the script-free policy', () => {
+    for (const p of ['/privacy', '/support', '/delete-account']) {
+      const c = run(p, false).headers.get('content-security-policy') ?? '';
+      expect(c).toContain("default-src 'none'");
+      expect(c).not.toContain('script-src');
+    }
+  });
+});

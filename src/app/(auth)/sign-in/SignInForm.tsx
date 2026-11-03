@@ -81,7 +81,7 @@ export function SignInForm() {
         <AppleButton onResult={apple} onError={(m) => show('Apple sign-in failed', m)} />
       </div>
       <div
-        className="my-5 flex items-center gap-3 text-label font-semibold tracking-[1.2px] text-ink-3"
+        className="my-5 flex items-center gap-3 text-label font-semibold tracking-[1.2px] text-ink-2"
         aria-hidden
       >
         <span className="h-px flex-1 bg-line" />

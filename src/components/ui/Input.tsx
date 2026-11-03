@@ -28,7 +28,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
           aria-invalid={error ? true : undefined}
           aria-describedby={error || hint ? descId : undefined}
           className={cn(
-            'w-full rounded-input border bg-surface px-4 py-3 text-body text-ink placeholder:text-ink-3',
+            'w-full rounded-input border bg-surface px-4 py-3 text-body text-ink placeholder:text-ink-2',
             error ? 'border-ai' : 'border-line',
             endAdornment && 'pr-12',
           )}

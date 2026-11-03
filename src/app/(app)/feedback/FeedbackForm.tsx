@@ -148,7 +148,7 @@ export function FeedbackForm() {
           value={detail}
           onChange={(e) => setDetail(e.target.value)}
           placeholder="e.g. I recorded this myself on my iPhone last Tuesday…"
-          className="w-full rounded-input border border-line bg-surface p-3 placeholder:text-ink-3"
+          className="w-full rounded-input border border-line bg-surface p-3 placeholder:text-ink-2"
         />
       </div>
 
