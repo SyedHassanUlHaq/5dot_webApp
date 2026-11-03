@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy Policy — 5dot</title>
+<meta name="description" content="5dot's privacy policy — what the app collects, how it's used, and your rights.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F2F2F7;
+    --surface: #FFFFFF;
+    --ink: #100D12;
+    --ink-soft: #6B7280;
+    --ink-faint: #9CA3AF;
+    --border: #E5E7EB;
+    --accent: #C0376B;
+    --accent-soft: #C0376B12;
+    --accent-line: #C0376B38;
+    --serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+    --sans: "Source Sans 3", -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #17141A;
+      --surface: #211C24;
+      --ink: #F3EEF2;
+      --ink-soft: #B3A7B9;
+      --ink-faint: #7C7182;
+      --border: #372F3D;
+      --accent: #E37EA8;
+      --accent-soft: #E37EA81c;
+      --accent-line: #E37EA845;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  img { max-width: 100%; }
+  a { color: var(--accent); }
+  a:focus-visible, button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+  }
+
+  /* ── Top bar ────────────────────────────────────────────── */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+  }
+  .topbar-inner {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 14px 24px;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .wordmark {
+    font-family: var(--serif);
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    display: flex;
+    align-items: baseline;
+    gap: 7px;
+  }
+  .wordmark .dot { color: var(--accent); }
+  .wordmark .doctype {
+    font-family: var(--sans);
+    font-weight: 500;
+    font-size: 13px;
+    color: var(--ink-faint);
+  }
+  .updated {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--ink-faint);
+    white-space: nowrap;
+  }
+
+  /* ── Hero / intro ───────────────────────────────────────── */
+  .page { max-width: 760px; margin: 0 auto; padding: 0 24px 96px; }
+  .intro { padding: 48px 0 8px; }
+  h1 {
+    font-family: var(--serif);
+    font-size: clamp(32px, 6vw, 44px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin: 0 0 14px;
+    text-wrap: balance;
+  }
+  .intro-lede {
+    font-size: 17px;
+    color: var(--ink-soft);
+    max-width: 62ch;
+    margin: 0 0 28px;
+  }
+
+  /* ── Fact pills ─────────────────────────────────────────── */
+  .facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 40px;
+  }
+  .fact {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 8px 14px 8px 10px;
+  }
+  .fact .mark {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--accent-soft);
+    color: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  /* ── Table of contents ──────────────────────────────────── */
+  .toc {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px 24px;
+    margin-bottom: 56px;
+  }
+  .toc-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0 0 14px;
+  }
+  .toc-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 20px;
+    row-gap: 9px;
+  }
+  @media (max-width: 520px) {
+    .toc-grid { grid-template-columns: 1fr; }
+  }
+  .toc-grid a {
+    display: flex;
+    gap: 9px;
+    font-size: 13.5px;
+    color: var(--ink-soft);
+    text-decoration: none;
+    padding: 2px 0;
+  }
+  .toc-grid a:hover { color: var(--accent); }
+  .toc-grid .n {
+    font-family: var(--mono);
+    color: var(--ink-faint);
+    font-size: 12.5px;
+    flex-shrink: 0;
+    width: 16px;
+  }
+
+  /* ── Sections ───────────────────────────────────────────── */
+  section.doc-section {
+    padding: 30px 0;
+    border-top: 1px solid var(--border);
+    scroll-margin-top: 76px;
+  }
+  section.doc-section:first-of-type { border-top: none; padding-top: 0; }
+  .sec-heading {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin: 0 0 14px;
+  }
+  .sec-num {
+    font-family: var(--mono);
+    font-size: 14px;
+    color: var(--accent);
+    flex-shrink: 0;
+  }
+  h2 {
+    font-family: var(--serif);
+    font-size: 21px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin: 0;
+    text-wrap: balance;
+  }
+  .sec-body p {
+    font-size: 15px;
+    color: var(--ink);
+    max-width: 68ch;
+    margin: 0 0 14px;
+  }
+  .sec-body p:last-child { margin-bottom: 0; }
+  .sec-body strong { font-weight: 600; }
+  .sec-body ul {
+    margin: 0 0 14px;
+    padding-left: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-width: 68ch;
+  }
+  .sec-body li {
+    font-size: 15px;
+    padding-left: 20px;
+    position: relative;
+  }
+  .sec-body li::before {
+    content: "";
+    position: absolute;
+    left: 4px;
+    top: 9px;
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+  .sec-body a { text-decoration-color: var(--accent-line); }
+
+  /* ── Footer ─────────────────────────────────────────────── */
+  footer {
+    margin-top: 56px;
+    padding-top: 22px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    font-size: 12.5px;
+    color: var(--ink-faint);
+  }
+  footer a { color: var(--ink-soft); }
+  .back-top {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--ink-faint);
+    text-decoration: none;
+  }
+  .back-top:hover { color: var(--accent); }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="wordmark"><span class="dot">&#9679;</span>5dot <span class="doctype">Privacy Policy</span></div>
+    <div class="updated">Updated Sep 7, 2026</div>
+  </div>
+</div>
+
+<div class="page">
+  <div class="intro">
+    <h1>Privacy Policy</h1>
+    <p class="intro-lede">
+      How 5dot collects, uses, shares, and protects information when you use our app to detect
+      AI-generated voice, AI-generated video, and lip-sync or tamper manipulation.
+    </p>
+
+    <div class="facts">
+      <span class="fact"><span class="mark">&#10003;</span>We never sell your personal information</span>
+      <span class="fact"><span class="mark">&#10003;</span>Passwords are hashed, never stored in plain text</span>
+      <span class="fact"><span class="mark">&#10003;</span>Delete your account and data anytime, in-app</span>
+    </div>
+
+    <nav class="toc">
+      <p class="toc-label">On this page</p>
+      <div class="toc-grid">
+        <a href="#s1"><span class="n">1</span>Overview</a>
+        <a href="#s2"><span class="n">2</span>Information we collect</a>
+        <a href="#s3"><span class="n">3</span>How we use your information</a>
+        <a href="#s4"><span class="n">4</span>How we share your information</a>
+        <a href="#s5"><span class="n">5</span>Data retention</a>
+        <a href="#s6"><span class="n">6</span>Data security</a>
+        <a href="#s7"><span class="n">7</span>Your rights and choices</a>
+        <a href="#s8"><span class="n">8</span>Children's privacy</a>
+        <a href="#s9"><span class="n">9</span>International data transfers</a>
+        <a href="#s10"><span class="n">10</span>Changes to this policy</a>
+        <a href="#s11"><span class="n">11</span>Contact us</a>
+      </div>
+    </nav>
+  </div>
+
+  <section class="doc-section" id="s1">
+    <div class="sec-heading"><span class="sec-num">01</span><h2>Overview</h2></div>
+    <div class="sec-body">
+      <p>This Privacy Policy explains how 5dot ("5dot", "we", "us", or "our") collects, uses, shares, and protects information when you use our mobile application and related services (the "Service"), which let you upload or link audio and video for AI-generated content detection (AI voice, AI-generated video, and lip-sync/tamper analysis).</p>
+      <p>By creating an account or otherwise using the Service, you agree to the collection and use of information as described in this Policy.</p>
+    </div>
+  </section>
+
+  <section class="doc-section" id="s2">
+    <div class="sec-heading"><span class="sec-num">02</span><h2>Information we collect</h2></div>
+    <div class="sec-body">
+      <p><strong>Account information.</strong> When you create an account, we collect your email address and password (stored as a salted hash, never in plain text), and optionally your first name, last name, and phone number. If you sign in with Google, Apple, Facebook, or Microsoft, we receive your name and email address from that provider instead.</p>
+      <p><strong>Verification codes.</strong> When you sign up with email and password, we send a one-time verification code to your email to confirm you own the address before your account is activated.</p>
+      <p><strong>Content you submit.</strong> The audio files, video files, and URLs you submit for analysis, along with the resulting verdicts, confidence scores, and evidence details we generate.</p>
+      <p><strong>Usage and device data.</strong> Information about how you use the Service, such as scan counts, feature usage, app crash and performance diagnostics, your device's push-notification token (so we can deliver notifications to you), and IP address at the time of each request.</p>
+      <p><strong>Billing information.</strong> If you subscribe to a paid plan, payment is handled directly by Stripe, Apple, or Google, depending on how you subscribe. We receive confirmation of your subscription status and plan, but we do not receive or store your full card number.</p>
+      <p><strong>Public content metadata.</strong> Our "Trending" feature displays publicly available metadata about popular videos (title, channel name, thumbnail, and view count) sourced from the YouTube Data API, together with aggregate, non-identifying scan statistics contributed by our user base for that public content.</p>
+    </div>
+  </section>
+
+  <section class="doc-section" id="s3">
+    <div class="sec-heading"><span class="sec-num">03</span><h2>How we use your information</h2></div>
+    <div class="sec-body">
+      <p>We use the information described above to: operate and provide the Service, including running AI detection analysis on content you submit; create and secure your account, including email verification and password reset; process subscription payments and enforce plan limits; send you service-related communications, including verification codes, security alerts, and (if you opt in) push notifications; monitor, maintain, and improve the reliability and accuracy of the Service; and detect, investigate, and prevent fraud, abuse, or violations of our Terms of Service.</p>
+      <p><strong>We do not sell your personal information.</strong></p>
+    </div>
+  </section>
+
+  <section class="doc-section" id="s4">
+    <div class="sec-heading"><span class="sec-num">04</span><h2>How we share your information</h2></div>
+    <div class="sec-body">
+      <p>We share information with service providers who help us operate the Service, each acting on our behalf and under contractual confidentiality obligations:</p>
+      <ul>
+        <li>Amazon Web Services (AWS) — for cloud storage of uploaded media and our application database.</li>
+        <li>Google, Apple, Facebook, and Microsoft — when you choose to sign in using one of these providers.</li>
+        <li>Stripe, Apple, and Google — to process subscription payments.</li>
+        <li>Our email delivery provider — to send verification codes and account-related emails.</li>
+        <li>Google (YouTube Data API) — to retrieve public video metadata for the Trending feature.</li>
+      </ul>
+      <p>We may also disclose information if required by law, to protect the rights, property, or safety of 5dot, our users, or the public, or in connection with a merger, acquisition, or sale of assets, subject to this Policy continuing to apply to your information.</p>
+    </div>
+  </section>
+
+  <section class="doc-section" id="s5">
+    <div class="sec-heading"><span class="sec-num">05</span><h2>Data retention</h2></div>
+    <div class="sec-body">
+      <p>We retain your account information for as long as your account is active. Uploaded media and analysis results are retained so you can view your scan history, until you delete your account. Verification codes expire automatically after 5 minutes and are discarded whether or not they are used. If you delete your account, we delete or anonymize your personal information within a reasonable period, except where we are required to retain it for legal, tax, or fraud-prevention purposes.</p>
+    </div>
+  </section>
+
+  <section class="doc-section" id="s6">
+    <div class="sec-heading"><span class="sec-num">06</span><h2>Data security</h2></div>
+    <div class="sec-body">
+      <p>We use industry-standard safeguards to protect your information, including encrypted connections (HTTPS/TLS) for data in transit, hashed storage of passwords, and access controls on our cloud infrastructure. No method of transmission or storage is completely secure, and we cannot guarantee absolute security.</p>
+    </div>
+  </section>
+
+  <section class="doc-section" id="s7">
+    <div class="sec-heading"><span class="sec-num">07</span><h2>Your rights and choices</h2></div>
+    <div class="sec-body">
+      <p>Depending on where you live, you may have the right to access, correct, export, or delete your personal information, and to object to or restrict certain processing. You can update your name, phone number, and avatar directly in the app's Profile screen. To request a copy of your data, request deletion of your account, or ask any other privacy question, contact us at <a href="mailto:thefivedot@gmail.com">thefivedot@gmail.com</a> and we will respond within a reasonable timeframe.</p>
+    </div>
+  </section>
+
+  <section class="doc-section" id="s8">
+    <div class="sec-heading"><span class="sec-num">08</span><h2>Children's privacy</h2></div>
+    <div class="sec-body">
+      <p>The Service is not directed to children under 13 (or the equivalent minimum age in your jurisdiction), and we do not knowingly collect personal information from children. If you believe a child has provided us with personal information, please contact us so we can delete it.</p>
+    </div>
+  </section>
+
+  <section class="doc-section" id="s9">
+    <div class="sec-heading"><span class="sec-num">09</span><h2>International data transfers</h2></div>
+    <div class="sec-body">
+      <p>We use cloud infrastructure that may process and store information in countries other than your own. Where required, we rely on appropriate safeguards to protect information transferred internationally.</p>
+    </div>
+  </section>
+
+  <section class="doc-section" id="s10">
+    <div class="sec-heading"><span class="sec-num">10</span><h2>Changes to this policy</h2></div>
+    <div class="sec-body">
+      <p>We may update this Privacy Policy from time to time. If we make material changes, we will notify you in the app or by email before the changes take effect. Continued use of the Service after an update constitutes acceptance of the revised Policy.</p>
+    </div>
+  </section>
+
+  <section class="doc-section" id="s11">
+    <div class="sec-heading"><span class="sec-num">11</span><h2>Contact us</h2></div>
+    <div class="sec-body">
+      <p>If you have questions about this Privacy Policy or how we handle your information, contact us at <a href="mailto:thefivedot@gmail.com">thefivedot@gmail.com</a>.</p>
+    </div>
+  </section>
+
+  <footer>
+    <span>&copy; 2026 5dot</span>
+    <a class="back-top" href="#">Back to top &uarr;</a>
+  </footer>
+</div>
+
+</body>
+</html>

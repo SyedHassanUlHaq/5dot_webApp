@@ -1,5 +1,5 @@
 'use client';
-import { BarChart3, Home, LogOut, Plus } from 'lucide-react';
+import { BarChart3, Bell, CreditCard, HelpCircle, Home, LogOut, Plus, User } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -11,6 +11,12 @@ import { useMe, useSignOut } from '@/lib/auth/session';
 const NAV = [
   { href: '/', label: 'Home', Icon: Home },
   { href: '/history', label: 'Dashboard', Icon: BarChart3 },
+  { href: '/plans', label: 'Plans', Icon: CreditCard },
+  { href: '/profile', label: 'Profile', Icon: User },
+] as const;
+const MORE = [
+  { href: '/notifications', label: 'Notifications', Icon: Bell },
+  { href: '/help', label: 'Help & support', Icon: HelpCircle },
 ] as const;
 
 const isActive = (path: string, href: string) =>
@@ -63,6 +69,20 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <Icon className="size-[18px]" aria-hidden /> {label}
             </Link>
           ))}
+          <hr className="my-2 border-line" />
+          {MORE.map(({ href, label, Icon }) => (
+            <Link
+              key={href}
+              href={href}
+              aria-current={isActive(path, href) ? 'page' : undefined}
+              className={cn(
+                'flex items-center gap-3 rounded-input px-3 py-2.5 font-semibold',
+                isActive(path, href) ? 'bg-brand/10 text-brand' : 'text-gray-700 hover:bg-gray-100',
+              )}
+            >
+              <Icon className="size-[18px]" aria-hidden /> {label}
+            </Link>
+          ))}
         </nav>
         <div className="mt-auto border-t border-line pt-4">
           <div className="mb-2 flex items-center gap-3 px-2">
@@ -101,18 +121,21 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       {/* Phone bottom tabs */}
       <nav
         aria-label="Main"
-        className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-3 border-t border-line bg-surface md:hidden"
+        className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-line bg-surface md:hidden"
       >
-        <Link
-          href="/"
-          aria-current={isActive(path, '/') ? 'page' : undefined}
-          className={cn(
-            'flex flex-col items-center gap-0.5 py-2 text-[11px] font-semibold',
-            isActive(path, '/') ? 'text-brand' : 'text-ink-2',
-          )}
-        >
-          <Home className="size-5" aria-hidden /> Home
-        </Link>
+        {[NAV[0], NAV[1]].map(({ href, label, Icon }) => (
+          <Link
+            key={href}
+            href={href}
+            aria-current={isActive(path, href) ? 'page' : undefined}
+            className={cn(
+              'flex flex-col items-center gap-0.5 py-2 text-[11px] font-semibold',
+              isActive(path, href) ? 'text-brand' : 'text-ink-2',
+            )}
+          >
+            <Icon className="size-5" aria-hidden /> {label}
+          </Link>
+        ))}
         <Link
           href="/scan"
           className="flex flex-col items-center gap-0.5 py-2 text-[11px] font-semibold text-brand"
@@ -122,16 +145,19 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </span>
           Analyze
         </Link>
-        <Link
-          href="/history"
-          aria-current={isActive(path, '/history') ? 'page' : undefined}
-          className={cn(
-            'flex flex-col items-center gap-0.5 py-2 text-[11px] font-semibold',
-            isActive(path, '/history') ? 'text-brand' : 'text-ink-2',
-          )}
-        >
-          <BarChart3 className="size-5" aria-hidden /> Dashboard
-        </Link>
+        {[NAV[2], NAV[3]].map(({ href, label, Icon }) => (
+          <Link
+            key={href}
+            href={href}
+            aria-current={isActive(path, href) ? 'page' : undefined}
+            className={cn(
+              'flex flex-col items-center gap-0.5 py-2 text-[11px] font-semibold',
+              isActive(path, href) ? 'text-brand' : 'text-ink-2',
+            )}
+          >
+            <Icon className="size-5" aria-hidden /> {label}
+          </Link>
+        ))}
       </nav>
     </div>
   );

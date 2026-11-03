@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Support — 5dot</title>
+<meta name="description" content="5dot support — frequently asked questions, troubleshooting, and how to contact us.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F2F2F7;
+    --surface: #FFFFFF;
+    --ink: #100D12;
+    --ink-soft: #6B7280;
+    --ink-faint: #9CA3AF;
+    --border: #E5E7EB;
+    --accent: #C0376B;
+    --accent-soft: #C0376B12;
+    --accent-line: #C0376B38;
+    --serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+    --sans: "Source Sans 3", -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #17141A;
+      --surface: #211C24;
+      --ink: #F3EEF2;
+      --ink-soft: #B3A7B9;
+      --ink-faint: #7C7182;
+      --border: #372F3D;
+      --accent: #E37EA8;
+      --accent-soft: #E37EA81c;
+      --accent-line: #E37EA845;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  img { max-width: 100%; }
+  a { color: var(--accent); }
+  a:focus-visible, button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+  }
+
+  /* ── Top bar ────────────────────────────────────────────── */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+  }
+  .topbar-inner {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 14px 24px;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .wordmark {
+    font-family: var(--serif);
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    display: flex;
+    align-items: baseline;
+    gap: 7px;
+  }
+  .wordmark .dot { color: var(--accent); }
+  .wordmark .doctype {
+    font-family: var(--sans);
+    font-weight: 500;
+    font-size: 13px;
+    color: var(--ink-faint);
+  }
+  .updated {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--ink-faint);
+    white-space: nowrap;
+  }
+
+  /* ── Hero / intro ───────────────────────────────────────── */
+  .page { max-width: 760px; margin: 0 auto; padding: 0 24px 96px; }
+  .intro { padding: 48px 0 8px; }
+  h1 {
+    font-family: var(--serif);
+    font-size: clamp(32px, 6vw, 44px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin: 0 0 14px;
+    text-wrap: balance;
+  }
+  .intro-lede {
+    font-size: 17px;
+    color: var(--ink-soft);
+    max-width: 62ch;
+    margin: 0 0 28px;
+  }
+
+  /* ── Contact card ───────────────────────────────────────── */
+  .contact-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px 22px;
+    margin-bottom: 40px;
+  }
+  .contact-card .label {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0 0 4px;
+  }
+  .contact-card .email {
+    font-size: 17px;
+    font-weight: 600;
+  }
+  .contact-card .btn {
+    display: inline-block;
+    background: var(--accent);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 100px;
+    white-space: nowrap;
+  }
+
+  /* ── Table of contents ──────────────────────────────────── */
+  .toc {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px 24px;
+    margin-bottom: 56px;
+  }
+  .toc-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0 0 14px;
+  }
+  .toc-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 20px;
+    row-gap: 9px;
+  }
+  @media (max-width: 520px) {
+    .toc-grid { grid-template-columns: 1fr; }
+  }
+  .toc-grid a {
+    display: flex;
+    gap: 9px;
+    font-size: 13.5px;
+    color: var(--ink-soft);
+    text-decoration: none;
+    padding: 2px 0;
+  }
+  .toc-grid a:hover { color: var(--accent); }
+  .toc-grid .n {
+    font-family: var(--mono);
+    color: var(--ink-faint);
+    font-size: 12.5px;
+    flex-shrink: 0;
+    width: 16px;
+  }
+
+  /* ── Sections ───────────────────────────────────────────── */
+  section.doc-section {
+    padding: 30px 0;
+    border-top: 1px solid var(--border);
+    scroll-margin-top: 76px;
+  }
+  section.doc-section:first-of-type { border-top: none; padding-top: 0; }
+  .sec-heading {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin: 0 0 14px;
+  }
+  .sec-num {
+    font-family: var(--mono);
+    font-size: 14px;
+    color: var(--accent);
+    flex-shrink: 0;
+  }
+  h2 {
+    font-family: var(--serif);
+    font-size: 21px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  /* ── FAQ items ──────────────────────────────────────────── */
+  .faq {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .faq-item h3 {
+    font-family: var(--sans);
+    font-size: 15.5px;
+    font-weight: 600;
+    margin: 0 0 6px;
+  }
+  .faq-item p {
+    font-size: 15px;
+    color: var(--ink-soft);
+    max-width: 68ch;
+    margin: 0;
+    white-space: pre-line;
+  }
+
+  .sec-body p {
+    font-size: 15px;
+    color: var(--ink);
+    max-width: 68ch;
+    margin: 0 0 14px;
+  }
+  .sec-body p:last-child { margin-bottom: 0; }
+  .sec-body strong { font-weight: 600; }
+  .sec-body a { text-decoration-color: var(--accent-line); }
+
+  /* ── Footer ─────────────────────────────────────────────── */
+  footer {
+    margin-top: 56px;
+    padding-top: 22px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    font-size: 12.5px;
+    color: var(--ink-faint);
+  }
+  footer a { color: var(--ink-soft); }
+  .back-top {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--ink-faint);
+    text-decoration: none;
+  }
+  .back-top:hover { color: var(--accent); }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="wordmark"><span class="dot">&#9679;</span>5dot <span class="doctype">Support</span></div>
+    <div class="updated">Updated Oct 15, 2026</div>
+  </div>
+</div>
+
+<div class="page">
+  <div class="intro">
+    <h1>Support</h1>
+    <p class="intro-lede">
+      Answers to common questions about using 5dot to detect AI-generated voice, AI-generated video,
+      and lip-sync or tamper manipulation. Can't find what you need? Reach us directly below.
+    </p>
+
+    <div class="contact-card">
+      <div>
+        <p class="label">Email us</p>
+        <div class="email">thefivedot@gmail.com</div>
+      </div>
+      <a class="btn" href="mailto:thefivedot@gmail.com">Contact support</a>
+    </div>
+
+    <nav class="toc">
+      <p class="toc-label">On this page</p>
+      <div class="toc-grid">
+        <a href="#s1"><span class="n">1</span>Getting started</a>
+        <a href="#s2"><span class="n">2</span>File formats &amp; limits</a>
+        <a href="#s3"><span class="n">3</span>Detection modes</a>
+        <a href="#s4"><span class="n">4</span>Accuracy &amp; limitations</a>
+        <a href="#s5"><span class="n">5</span>Account &amp; sign-in</a>
+        <a href="#s6"><span class="n">6</span>Plans &amp; billing</a>
+        <a href="#s7"><span class="n">7</span>Privacy &amp; your data</a>
+        <a href="#s8"><span class="n">8</span>Contact us</a>
+      </div>
+    </nav>
+  </div>
+
+  <section class="doc-section" id="s1">
+    <div class="sec-heading"><span class="sec-num">01</span><h2>Getting started</h2></div>
+    <div class="faq">
+      <div class="faq-item">
+        <h3>How do I run my first scan?</h3>
+        <p>From the Home tab, tap "Analyze now," choose a detection mode, then either choose a file from your device or paste a link (YouTube, TikTok, Instagram, Facebook, or X). You'll be taken to a progress screen while it's analyzed, then to the result.</p>
+      </div>
+      <div class="faq-item">
+        <h3>How long does a scan take?</h3>
+        <p>Most scans finish within a minute or two, depending on the length of the clip and how busy our servers are. You can leave the screen and come back — the result will be waiting in your History tab once it's done.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="doc-section" id="s2">
+    <div class="sec-heading"><span class="sec-num">02</span><h2>File formats &amp; limits</h2></div>
+    <div class="faq">
+      <div class="faq-item">
+        <h3>What file formats are supported?</h3>
+        <p>Video: mp4, mov. Audio: mp3, m4a, wav, opus.</p>
+      </div>
+      <div class="faq-item">
+        <h3>What's the maximum file size and length?</h3>
+        <p>Up to 125 MB and 5 minutes per file. Direct uploads and pasted links are both subject to the same limit.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="doc-section" id="s3">
+    <div class="sec-heading"><span class="sec-num">03</span><h2>Detection modes</h2></div>
+    <div class="faq">
+      <div class="faq-item">
+        <h3>What's the difference between the three checks?</h3>
+        <p>AI Voice Detection checks whether a voice is real or synthesized/cloned by AI.
+Deepfake Video Detection checks whether the footage itself was AI-generated or face-swapped.
+Lip-Sync Detection finds cut-and-splice edits, re-encoding jumps, and timeline discontinuities — regardless of whether AI was involved.</p>
+      </div>
+      <div class="faq-item">
+        <h3>Can I run more than one check at once?</h3>
+        <p>Yes — select as many detection modes as you like before submitting a scan; each one appears as its own result on the same report.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="doc-section" id="s4">
+    <div class="sec-heading"><span class="sec-num">04</span><h2>Accuracy &amp; limitations</h2></div>
+    <div class="faq">
+      <div class="faq-item">
+        <h3>How accurate is 5dot?</h3>
+        <p>Every result comes with a confidence score so you can see how certain the verdict is — tap "Show technical details" on any result to see it. 5dot's detection is automated and meant to help you make an informed judgment; it is a strong signal, not absolute proof.</p>
+      </div>
+      <div class="faq-item">
+        <h3>Can 5dot detect all AI-generated content?</h3>
+        <p>No tool can guarantee complete detection. New generation methods appear regularly, and very short clips have less signal to analyze. If a result looks wrong, use the "Wrong?" button on the result screen to let us know — it helps us improve.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="doc-section" id="s5">
+    <div class="sec-heading"><span class="sec-num">05</span><h2>Account &amp; sign-in</h2></div>
+    <div class="faq">
+      <div class="faq-item">
+        <h3>How do I sign in?</h3>
+        <p>With Google, with Sign in with Apple, or with an email and password — whichever you prefer. Switching providers later isn't supported, so sign in the same way each time.</p>
+      </div>
+      <div class="faq-item">
+        <h3>How do I delete my account and data?</h3>
+        <p>Go to Profile → Privacy &amp; Security → Delete account. You'll be asked to confirm. All analyses, results, and personal data are deleted and cannot be recovered.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="doc-section" id="s6">
+    <div class="sec-heading"><span class="sec-num">06</span><h2>Plans &amp; billing</h2></div>
+    <div class="faq">
+      <div class="faq-item">
+        <h3>What happens when I reach my monthly scan limit?</h3>
+        <p>You'll see a notice before starting a new analysis once you hit your plan's monthly limit. Your existing results stay fully accessible, and the limit resets at the start of your next billing cycle.</p>
+      </div>
+      <div class="faq-item">
+        <h3>How do I cancel my subscription?</h3>
+        <p>On iOS: Settings → your name → Subscriptions → 5dot → Cancel.
+On Android: Google Play → Subscriptions → 5dot → Cancel.
+Access continues until the end of the current billing period. Refunds are handled through Apple's or Google's own refund process — contact us and we'll do what we can to help.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="doc-section" id="s7">
+    <div class="sec-heading"><span class="sec-num">07</span><h2>Privacy &amp; your data</h2></div>
+    <div class="sec-body">
+      <p>Uploaded files are used only to run your analysis and are not kept longer than necessary. For the full details on what we collect, how it's used, and your rights, see our <a href="privacy-policy.html">Privacy Policy</a>.</p>
+    </div>
+  </section>
+
+  <section class="doc-section" id="s8">
+    <div class="sec-heading"><span class="sec-num">08</span><h2>Contact us</h2></div>
+    <div class="sec-body">
+      <p>Didn't find an answer here? Email us at <a href="mailto:thefivedot@gmail.com">thefivedot@gmail.com</a> and we'll get back to you.</p>
+    </div>
+  </section>
+
+  <footer>
+    <span>&copy; 2026 5dot</span>
+    <a class="back-top" href="#">Back to top &uarr;</a>
+  </footer>
+</div>
+
+</body>
+</html>

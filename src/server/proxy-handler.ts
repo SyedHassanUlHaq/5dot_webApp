@@ -8,7 +8,7 @@ import { AT_COOKIE, clearSession, RT_COOKIE, setSession } from './session';
 import type { Tokens } from '@/lib/api/schemas';
 
 /** Only these backend areas are reachable through the proxy (auth goes through /api/auth/*). */
-const ALLOWED = new Set(['scans', 'users', 'stats', 'plans', 'feedback']);
+const ALLOWED = new Set(['scans', 'users', 'stats', 'plans', 'feedback', 'notifications']);
 const SAFE_METHODS = new Set(['GET', 'HEAD']);
 const FORWARD_REQ_HEADERS = ['content-type', 'accept'];
 const FORWARD_RES_HEADERS = [

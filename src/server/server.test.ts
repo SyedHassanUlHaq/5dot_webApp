@@ -189,6 +189,7 @@ describe('refreshTokens', () => {
 describe('proxy', () => {
   it('only allows known backend areas and safe segments', () => {
     expect(isAllowedPath(['scans', 'history'])).toBe(true);
+    expect(isAllowedPath(['notifications'])).toBe(true);
     expect(isAllowedPath(['auth', 'signin'])).toBe(false);
     expect(isAllowedPath(['scans', '..', 'auth'])).toBe(false);
     expect(isAllowedPath([])).toBe(false);

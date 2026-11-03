@@ -2,20 +2,21 @@ import { NextResponse, type NextRequest } from 'next/server';
 
 const RT_COOKIE = '5dot_rt';
 /** Reachable while signed out. Everything else is the protected (app) area. */
-const PUBLIC = [
+export const PUBLIC = [
   '/sign-in',
   '/sign-up',
   '/verify',
   '/forgot-password',
   '/reset-password',
   '/privacy',
+  '/legal', // terms + cookie policy (linked from sign-up)
   '/delete-account',
   '/support',
   '/dev',
 ];
-const AUTH_ONLY = ['/sign-in', '/sign-up', '/verify', '/forgot-password', '/reset-password'];
+export const AUTH_ONLY = ['/sign-in', '/sign-up', '/verify', '/forgot-password', '/reset-password'];
 
-const matches = (path: string, list: string[]) =>
+export const matches = (path: string, list: string[]) =>
   list.some((p) => path === p || path.startsWith(`${p}/`));
 
 export function middleware(req: NextRequest) {

@@ -116,3 +116,25 @@ export const WeeklyStatsSchema = z.object({
   flaggedScans: z.number(),
   dailyBreakdown: z.array(z.object({ day: z.string(), scans: z.number() })),
 });
+
+export const NotificationSchema = z.object({
+  id: z.string(),
+  template: z.string(),
+  title: z.string(),
+  body: z.string(),
+  data: z.record(z.string(), z.unknown()).optional(),
+  read: z.boolean(),
+  createdAt: z.string(),
+});
+export type AppNotification = z.infer<typeof NotificationSchema>;
+export const NotificationListSchema = z.object({
+  items: z.array(NotificationSchema),
+  total: z.number(),
+  unread: z.number(),
+  page: z.number(),
+  limit: z.number(),
+  hasMore: z.boolean(),
+});
+
+export const FeedbackResponseSchema = z.object({ feedbackId: z.string(), message: z.string() });
+export type Plan = z.infer<typeof PlanSchema>;
