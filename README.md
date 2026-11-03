@@ -1,20 +1,39 @@
 # 5dot Web App
 
-Browser version of the 5dot mobile app (AI-generated / tampered media detection). Same backend and accounts as mobile.
-Separate from the marketing site (`../5dot_web`).
+The browser version of the 5dot mobile app: detect AI-generated or tampered audio/video. Upload a file or paste a YouTube/X/TikTok link and get a
+0–100 verdict with evidence. Same backend and accounts as the mobile app. (The marketing site is a separate project: `../5dot_web`.)
 
-## Setup
+## Quick start
 
-```
-cp .env.example .env.local
+```bash
+cp .env.example .env.local      # defaults point at https://api.axioware.tech/v1
 npm install
-npm run dev     # http://localhost:3000
+npm run dev                     # http://localhost:3000
 ```
+
+Developed and tested on Node 22. To try it without the real API: `node e2e/mock-backend.mjs` and set `NEXT_PUBLIC_API_BASE_URL=http://localhost:4010/v1`
+(any email and password works except the password `wrong`, which is rejected; OTP codes are `123456`).
 
 ## Scripts
 
-`npm run typecheck | lint | test | build | test:e2e`
+|                                         |                                                                                                                                                                                 |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm run dev` / `build` / `start`       | Next.js                                                                                                                                                                         |
+| `npm run typecheck` · `lint` · `format` | tsc, ESLint, Prettier                                                                                                                                                           |
+| `npm test`                              | Vitest unit/component tests                                                                                                                                                     |
+| `npm run test:e2e`                      | Playwright smoke + accessibility tests against a production build and the mock backend. Use `PW_CHANNEL=chrome` to run on system Chrome instead of Playwright's bundled browser |
+
+Stop any other `next dev` in this folder before building: it shares `.next` and will corrupt the build.
 
 ## Docs
 
-See `docs/` (architecture, auth, billing, deploy) — filled in as milestones land.
+- [docs/architecture.md](docs/architecture.md): how it fits together, mobile parity, design-token deviations
+- [docs/auth.md](docs/auth.md): cookies, refresh, CSRF, Google/Apple setup
+- [docs/billing.md](docs/billing.md): proposed Stripe design and backend work (not built)
+- [docs/deploy.md](docs/deploy.md): env vars, hosting, DNS, checklist
+
+## Security in one paragraph
+
+Tokens live in httpOnly cookies behind a thin BFF (`/api/auth/*`, `/api/proxy/*`); browser JS never sees the refresh token. Mutating routes check `Origin`,
+auth routes are rate-limited, every page has a nonce-based CSP, and nothing logs tokens or personal data. The one exception, a short-lived access token handed to
+the browser so large files can upload directly to the backend, is documented in [docs/auth.md](docs/auth.md).
