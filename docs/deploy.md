@@ -13,6 +13,13 @@ Route 53 (<domain>)
 
 Approximate monthly cost (check the AWS Pricing Calculator): site ≈ $1–3 · app ≈ $35–50 (ALB ≈ $20, Fargate 0.5 vCPU/1 GB ≈ $18, rest a few dollars).
 
+## Domains for this project
+
+- **Primary: `5dotai.com`**: marketing site at the apex, web app at `app.5dotai.com`.
+- **Secondary: `fivedotai.com`**: it and every `www.` host answer with a **301 redirect to `https://5dotai.com`** (one CloudFront Function, section 2.3), so there is a single canonical site for SEO, QR codes and links.
+- Both are registered at **GoDaddy**. Only DNS moves to Route 53; the registration (and renewal) stays at GoDaddy, so keep auto-renew on.
+- Wherever this runbook says `<domain>`, use `5dotai.com`.
+
 ## Why this shape
 
 - **5dot_web is plain static files** (verified: `next build` with `output: 'export'` produces ~4.6 MB). No server needed → S3 + CloudFront.
@@ -28,13 +35,16 @@ Approximate monthly cost (check the AWS Pricing Calculator): site ≈ $1–3 · 
 2. **Billing guardrail:** Billing → Budgets → create a monthly cost budget (e.g. $60) with email alerts.
 3. **Tools on your machine:** AWS CLI v2 (`aws configure sso` or `aws configure`), Docker, Node 22.
 4. **Decide the names** and write them down: the domain, `app.<domain>`, `origin.<domain>` (internal name for the load balancer).
-5. **Marketing site URL:** `5dot_web` bakes `NEXT_PUBLIC_SITE_URL` into canonical tags, the sitemap, robots and QR codes **at build time** and defaults to `https://5dot.app`. Set it to your real public URL when you build (step 3.4).
+5. **Marketing site URL:** `5dot_web` bakes `NEXT_PUBLIC_SITE_URL` into canonical tags, the sitemap, robots and QR codes **at build time**. The code default is now `https://5dotai.com`, but pass it explicitly when you build (step 2.1) so a typo can't ship the wrong domain.
 
-## 1. DNS and certificates
+## 1. DNS and certificates (GoDaddy → Route 53)
 
-1. **Route 53 → Hosted zones → Create hosted zone** for `<domain>` (public). If the domain is registered elsewhere, copy the 4 `NS` values into the registrar's nameserver settings (propagation can take up to ~48 h, usually minutes). Use Route 53 for DNS even if the registrar offers it: the bare domain needs an _alias_ record to CloudFront, which most registrars can't do.
-2. **ACM in `us-east-1` (N. Virginia)** — required for CloudFront. _Request a public certificate_ with names: `<domain>`, `www.<domain>`, `app.<domain>`. Validation: DNS → click **Create records in Route 53**. Wait until _Issued_.
-3. **ACM in `ap-southeast-1`** — for the load balancer. Names: `app.<domain>` **and** `origin.<domain>` (both, so CloudFront's HTTPS check passes whether it matches the forwarded Host or the origin name). DNS validation the same way.
+I checked both domains: they use GoDaddy's nameservers, point at a parking page, and have **no MX (email), TXT, CAA or DNSSEC records**, so nothing needs preserving and nothing blocks certificate issuance.
+
+1. **Route 53 → Hosted zones → Create hosted zone**: `5dotai.com`, type _Public_. Repeat for `fivedotai.com`. Each zone shows **4 `NS` values** (different for each zone). Use Route 53 for DNS because the bare domain needs an _alias_ record to CloudFront, which GoDaddy can't do.
+2. **GoDaddy → My Products → the domain → DNS → Nameservers → Change Nameservers → "I'll use my own nameservers"**: enter that zone's 4 values (without the trailing dot) → Save. Do it for each domain with **its own** zone's values. Check progress with `dig +short NS 5dotai.com` (should show `awsdns` names; usually minutes, can take up to 48 h). The parking page stops working at this point, which is fine.
+3. **Wait for step 2 to propagate**, then **ACM in `us-east-1` (N. Virginia)**, required for CloudFront: _Request a public certificate_ with names `5dotai.com`, `www.5dotai.com`, `app.5dotai.com`, `fivedotai.com`, `www.fivedotai.com`. Validation = DNS → **Create records in Route 53** (works for both zones). Wait for _Issued_.
+4. _(Later, for the web app)_ **ACM in `ap-southeast-1`**: names `app.5dotai.com` **and** `origin.5dotai.com`, DNS validation the same way.
 
 ## 2. Marketing site (`5dot_web`) → S3 + CloudFront
 
@@ -52,15 +62,19 @@ NEXT_PUBLIC_SITE_URL=https://<domain> npm ci && NEXT_PUBLIC_SITE_URL=https://<do
 
 S3 → Create bucket: name `5dot-site-<account-id>`, region `ap-southeast-1`, **Block all public access = ON**, ACLs disabled, default encryption on. No static-website hosting.
 
-### 2.3 CloudFront function (clean URLs + www redirect)
+### 2.3 CloudFront function (clean URLs + redirect to the primary domain)
 
-CloudFront → Functions → Create function `site-rewrite` (runtime 2.0) → Publish:
+CloudFront → Functions → Create function `site-rewrite` (runtime 2.0) → paste → **Publish**:
 
 ```js
+var PRIMARY = '5dotai.com';
+
 function handler(event) {
   var req = event.request;
-  var host = req.headers.host.value;
-  if (host.indexOf('www.') === 0) {
+  var host = req.headers.host.value.toLowerCase();
+
+  // fivedotai.com, www.5dotai.com, www.fivedotai.com ... -> https://5dotai.com (same path + query)
+  if (host !== PRIMARY) {
     var qs = Object.keys(req.querystring)
       .map(function (k) {
         var v = req.querystring[k];
@@ -70,12 +84,13 @@ function handler(event) {
     return {
       statusCode: 301,
       statusDescription: 'Moved Permanently',
-      headers: { location: { value: 'https://' + host.slice(4) + req.uri + (qs ? '?' + qs : '') } },
+      headers: { location: { value: 'https://' + PRIMARY + req.uri + (qs ? '?' + qs : '') } },
     };
   }
+
   var uri = req.uri;
   if (uri.charAt(uri.length - 1) === '/')
-    req.uri = uri + 'index.html'; // "/"  -> /index.html
+    req.uri = uri + 'index.html'; // "/"      -> /index.html
   else if (uri.indexOf('.') === -1) req.uri = uri + '.html'; // "/terms" -> /terms.html
   return req;
 }
@@ -85,7 +100,7 @@ function handler(event) {
 
 - **Origin:** the S3 bucket (REST endpoint, not the website endpoint). _Origin access_ = **Origin access control (OAC)** → create new, sign requests. After creating, CloudFront shows a bucket policy: **copy it into the bucket's Permissions → Bucket policy**.
 - **Default behavior:** Viewer protocol = _Redirect HTTP to HTTPS_; allowed methods GET/HEAD; **Cache policy = CachingOptimized**; Compress = on; **Response headers policy = SecurityHeadersPolicy** (managed; adds HSTS, nosniff, frame and referrer headers); **Function associations → Viewer request = `site-rewrite`**.
-- **Settings:** alternate domain names `<domain>`, `www.<domain>`; custom SSL certificate = the `us-east-1` one; security policy TLSv1.2_2021; HTTP/2 and HTTP/3 on; default root object `index.html`.
+- **Settings:** alternate domain names **`5dotai.com`, `www.5dotai.com`, `fivedotai.com`, `www.fivedotai.com`**; custom SSL certificate = the `us-east-1` one; security policy TLSv1.2_2021; HTTP/2 and HTTP/3 on; default root object `index.html`.
 - **Error pages:** add custom error responses for **403** and **404** → response page path `/404.html`, HTTP response code **404** (S3 returns 403 for missing keys when access is via OAC).
 
 ### 2.5 Upload (and every future release)
@@ -101,7 +116,7 @@ aws cloudfront create-invalidation --distribution-id <SITE_DISTRIBUTION_ID> --pa
 
 ### 2.6 DNS records
 
-Route 53 → hosted zone → create **A (Alias)** records for `<domain>` and `www.<domain>` → _Alias to CloudFront distribution_ → "site". Also add **AAAA** aliases if IPv6 is enabled on the distribution.
+In **each** hosted zone (`5dotai.com` and `fivedotai.com`) create **A (Alias)** records for the bare domain **and** for `www`, with _Alias to CloudFront distribution_ → "site" (pick the distribution from the dropdown). Add matching **AAAA** aliases too if IPv6 is enabled on the distribution. The function redirects everything except `https://5dotai.com` to it.
 
 ---
 
@@ -180,8 +195,8 @@ The app rate-limits by client IP read from `X-Forwarded-For`, counting `TRUSTED_
 
 ## 5. Smoke test (do all of these)
 
-- [ ] `https://<domain>` loads; `https://www.<domain>` redirects to it; `/terms`, `/download` work; `/privacy-policy.html`, `/support.html`, `/delete-account.html` open.
-- [ ] `https://<domain>/sitemap.xml` and `/robots.txt` contain `https://<domain>` (not `5dot.app` unless that _is_ your domain).
+- [ ] `https://5dotai.com` loads; `https://www.5dotai.com`, `https://fivedotai.com` and `https://www.fivedotai.com` each 301-redirect to it (check with `curl -I`); `/terms`, `/download` work; `/privacy-policy.html`, `/support.html`, `/delete-account.html` open.
+- [ ] `https://<domain>/sitemap.xml` and `/robots.txt` contain `https://5dotai.com`.
 - [ ] `https://app.<domain>/api/health` → `{"status":"ok"}`; `http://app.<domain>` redirects to https.
 - [ ] `https://app.<domain>/sign-in`: no errors in the browser console; the Google button renders.
 - [ ] Sign up with a real email → OTP → terms → home. Sign out and in again.
