@@ -30,7 +30,19 @@ Stop any other `next dev` in this folder before building: it shares `.next` and 
 - [docs/architecture.md](docs/architecture.md): how it fits together, mobile parity, design-token deviations
 - [docs/auth.md](docs/auth.md): cookies, refresh, CSRF, Google/Apple setup
 - [docs/billing.md](docs/billing.md): proposed Stripe design and backend work (not built)
-- [docs/deploy.md](docs/deploy.md): env vars, hosting, DNS, checklist
+- [docs/deploy.md](docs/deploy.md): step-by-step AWS runbook (S3 + CloudFront for the marketing site, ECS Fargate for this app), env vars, checklist
+
+## Docker
+
+```bash
+docker build --platform linux/amd64 \
+  --build-arg NEXT_PUBLIC_API_BASE_URL=https://api.axioware.tech/v1 \
+  --build-arg NEXT_PUBLIC_APP_ORIGIN=https://app.<domain> \
+  --build-arg NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID=<web client id> -t 5dot-webapp .
+docker run -p 3000:3000 -e TRUSTED_PROXY_HOPS=1 5dot-webapp
+```
+
+`NEXT_PUBLIC_*` are build args (baked into the bundle and CSP). Health check: `GET /api/health`. See [docs/deploy.md](docs/deploy.md).
 
 ## Security in one paragraph
 

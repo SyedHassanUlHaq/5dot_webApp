@@ -2,7 +2,13 @@
 import { NextRequest } from 'next/server';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { handleAuth } from './auth-handler';
-import { _resetRateLimits, checkOrigin, rateLimit } from './guards';
+import {
+  _resetRateLimits,
+  checkOrigin,
+  ipFromForwardedFor,
+  rateLimit,
+  trustedProxyHops,
+} from './guards';
 import { handleProxy, isAllowedPath } from './proxy-handler';
 import { _resetRefreshCache, refreshTokens } from './refresh';
 
@@ -315,5 +321,60 @@ describe('upload-token', () => {
   it('401 SESSION_EXPIRED without a session', async () => {
     const res = await handleAuth(req('/api/auth/upload-token', { method: 'POST' }), 'upload-token');
     expect(res.status).toBe(401);
+  });
+});
+
+describe('client IP behind proxies (rate-limit key)', () => {
+  it('takes the entry `hops` from the end, so a forged first entry is ignored', () => {
+    // Client forges "6.6.6.6"; CloudFront appends the viewer IP; the ALB appends CloudFront's edge IP.
+    const h = '6.6.6.6, 203.0.113.9, 130.176.0.1';
+    expect(ipFromForwardedFor(h, 2)).toBe('203.0.113.9'); // CloudFront → ALB
+    expect(ipFromForwardedFor('6.6.6.6, 203.0.113.9', 1)).toBe('203.0.113.9'); // ALB only
+    expect(ipFromForwardedFor('203.0.113.9', 1)).toBe('203.0.113.9'); // Vercel-style single value
+  });
+  it('degrades safely', () => {
+    expect(ipFromForwardedFor('1.1.1.1', 2)).toBe('1.1.1.1'); // fewer entries than hops
+    expect(ipFromForwardedFor(null, 1)).toBe('unknown');
+    expect(ipFromForwardedFor('', 1)).toBe('unknown');
+    expect(ipFromForwardedFor(' , ,', 1)).toBe('unknown');
+    expect(ipFromForwardedFor('1.1.1.1', 0)).toBe('unknown'); // never trust
+    expect(ipFromForwardedFor('x'.repeat(500), 1).length).toBe(64);
+  });
+  it('TRUSTED_PROXY_HOPS parsing: default 1, rejects junk', () => {
+    expect(trustedProxyHops(undefined)).toBe(1);
+    expect(trustedProxyHops('2')).toBe(2);
+    expect(trustedProxyHops('0')).toBe(0);
+    expect(trustedProxyHops('abc')).toBe(1);
+    expect(trustedProxyHops('-3')).toBe(1);
+    expect(trustedProxyHops('99')).toBe(1);
+  });
+  it('rotating a forged X-Forwarded-For cannot dodge the auth rate limit', async () => {
+    vi.stubEnv('TRUSTED_PROXY_HOPS', '2');
+    fetchMock.mockImplementation(async () => j({ detail: 'no' }, 401));
+    let last = 0;
+    for (let i = 0; i < 11; i++) {
+      const res = await handleAuth(
+        req('/api/auth/signin', {
+          method: 'POST',
+          body: { email: 'a@b.c', password: 'x' },
+          headers: { 'x-forwarded-for': `10.0.0.${i}, 203.0.113.50, 130.176.0.1` },
+        }),
+        'signin',
+      );
+      last = res.status;
+    }
+    expect(last).toBe(429); // same real client (203.0.113.50) every time
+    vi.unstubAllEnvs();
+  });
+});
+
+describe('GET /api/health', () => {
+  it('is a cheap 200 that never touches the backend', async () => {
+    const { GET } = await import('@/app/api/health/route');
+    const res = GET();
+    expect(res.status).toBe(200);
+    expect(res.headers.get('cache-control')).toBe('no-store');
+    expect(await res.json()).toEqual({ status: 'ok' });
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 });

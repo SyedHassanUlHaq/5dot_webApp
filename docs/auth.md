@@ -30,7 +30,7 @@ Neither is readable by page JavaScript; nothing token-like is put in `localStora
 - Backend **unreachable / 5xx** during refresh → `503`, session **kept** (mobile signs the user out here; the web app doesn't).
 - Multipart bodies stream through the proxy and can't be replayed, so they aren't retried after a 401 (uploads use the direct path anyway).
 
-**Limitation:** the single-flight map and the rate limiters are in-memory, per server instance. With several instances two of them may refresh the same token concurrently; if the backend rotates refresh tokens strictly, the loser gets a spurious sign-out. Use one instance, sticky sessions, or a shared store (Redis/Upstash) before scaling out.
+**Limitation:** the single-flight map and the rate limiters are in-memory, per server instance. With several instances — and especially on serverless/Lambda-style hosting, where parallel requests land on different instances — two requests may refresh the same token concurrently; if the backend invalidates a refresh token once used, the loser gets a spurious sign-out _and clears the winner's fresh cookies_. This is why the recommended deployment is a **single long-running container** (see [deploy.md](./deploy.md)). Before scaling out, add a shared store (Redis/Upstash) for the de-dup, or confirm the backend tolerates re-use of a just-rotated refresh token (test: call `/auth/refresh` twice with the same token).
 
 ## CSRF
 
@@ -38,7 +38,8 @@ Mutating BFF routes require a same-origin `Origin` header (equal to the request 
 
 ## Rate limits (in-memory, per IP)
 
-Auth actions 10/min per action · `upload-token` 30/min · proxy 600/min. IP comes from the first `X-Forwarded-For` entry — only trustworthy behind a proxy that sets it (Vercel does; configure your own proxy to overwrite, not append).
+Auth actions 10/min per action · `upload-token` 30/min · proxy 600/min.
+The client IP is read from `X-Forwarded-For`, counting **`TRUSTED_PROXY_HOPS`** entries from the _end_ (default 1; CloudFront + ALB = 2). Entries further left are attacker-controlled, so the first entry is never trusted. Wrong values either weaken the limit or put every user in one bucket; see [deploy.md](./deploy.md). Verified in a container with forged headers.
 
 ## The one token exposure: direct uploads
 

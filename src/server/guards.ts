@@ -24,8 +24,32 @@ export function checkOrigin(req: NextRequest): ApiError | null {
 // ── Fixed-window rate limiter (in-memory, per instance) ─────────────────────
 const buckets = new Map<string, { count: number; resetAt: number }>();
 
+/**
+ * Number of trusted reverse proxies in front of the app (each appends the address it received the request from to X-Forwarded-For).
+ * Examples: ALB only = 1 (default); CloudFront → ALB = 2; Vercel = 1 (it overwrites the header).
+ * Set TRUSTED_PROXY_HOPS at runtime. 0 = never trust the header (everyone shares one rate-limit bucket).
+ */
+export function trustedProxyHops(raw: string | undefined = process.env.TRUSTED_PROXY_HOPS): number {
+  const n = Number.parseInt(raw ?? '', 10);
+  return Number.isInteger(n) && n >= 0 && n <= 10 ? n : 1;
+}
+
+/**
+ * The client IP is the entry `hops` from the END of X-Forwarded-For. Entries to the left of that can be forged by the client
+ * (a proxy appends to whatever the client sent), so taking the first entry would let anyone dodge rate limits by rotating a fake value.
+ */
+export function ipFromForwardedFor(header: string | null, hops: number): string {
+  if (hops <= 0 || !header) return 'unknown';
+  const parts = header
+    .split(',')
+    .map((p) => p.trim())
+    .filter(Boolean);
+  if (parts.length === 0) return 'unknown';
+  return parts[Math.max(0, parts.length - hops)]!.slice(0, 64);
+}
+
 export function clientIp(req: NextRequest): string {
-  return req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+  return ipFromForwardedFor(req.headers.get('x-forwarded-for'), trustedProxyHops());
 }
 
 export function rateLimit(
