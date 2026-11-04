@@ -33,6 +33,16 @@ describe('scan schemas against real backend payloads', () => {
     expect(ScanHistorySchema.parse({ ...real, hasMore: false }).hasMore).toBe(false);
   });
 
+  it('accepts items that omit resultData, completedAt and progress (failed/in-flight scans)', () => {
+    const bare: Record<string, unknown> = { ...real.items[0]!, status: 'failed' };
+    for (const k of ['resultData', 'completedAt', 'progress', 'detections']) delete bare[k];
+    const parsed = ScanResponseSchema.parse(bare);
+    expect(parsed.resultData).toBeNull();
+    expect(parsed.completedAt).toBeNull();
+    expect(parsed.progress).toBe(0);
+    expect(parsed.detections).toEqual({});
+  });
+
   it('keeps a real error message and accepts explicit null', () => {
     const base = real.items[0]!;
     expect(ScanResponseSchema.parse({ ...base, errorMessage: 'boom' }).errorMessage).toBe('boom');

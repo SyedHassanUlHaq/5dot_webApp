@@ -9,9 +9,15 @@ export async function apiRequest<S extends z.ZodType>(
 ): Promise<z.output<S>> {
   const res = await rawRequest(`/api/proxy/${path.replace(/^\/+/, '')}`, init);
   const parsed = schema.safeParse(await res.json());
-  if (!parsed.success)
-    throw new ApiError('BAD_RESPONSE', 'Unexpected response from the server.', 502);
+  if (!parsed.success) throw badResponse(path, parsed.error);
   return parsed.data;
+}
+
+/** Logs only field paths and issue codes (never values) so a schema mismatch is diagnosable from the console. */
+function badResponse(where: string, error: z.ZodError): ApiError {
+  const issues = error.issues.slice(0, 5).map((i) => `${i.path.join('.') || '(root)'}: ${i.code}`);
+  console.warn(`[api] unexpected response shape from ${where}`, issues);
+  return new ApiError('BAD_RESPONSE', 'Unexpected response from the server.', 502);
 }
 
 /** For endpoints that answer 204 No Content (e.g. DELETE /users/me). */
@@ -29,8 +35,7 @@ export async function authRequest<S extends z.ZodType>(
 ): Promise<z.output<S>> {
   const res = await rawRequest(`/api/auth/${action}`, { method: 'POST', json: json ?? {} });
   const parsed = schema.safeParse(await res.json());
-  if (!parsed.success)
-    throw new ApiError('BAD_RESPONSE', 'Unexpected response from the server.', 502);
+  if (!parsed.success) throw badResponse(`auth/${action}`, parsed.error);
   return parsed.data;
 }
 

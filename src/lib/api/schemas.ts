@@ -53,16 +53,29 @@ export const ScanResponseSchema = z.object({
   // Single choke point: every scan has a clean, human-readable filename (same as mobile decodeResponse).
   filename: z.string().transform(safeDecodeFilename),
   status: z.enum(['processing', 'complete', 'failed']),
-  progress: z.number(),
-  detections: z.partialRecord(DetectionKind, DetectionState),
-  resultData: z.partialRecord(DetectionKind, DetectionResult).nullable(),
+  progress: z
+    .number()
+    .nullish()
+    .transform((v) => v ?? 0),
+  detections: z
+    .partialRecord(DetectionKind, DetectionState)
+    .nullish()
+    .transform((v) => v ?? {}),
+  // Failed/in-flight scans may omit these instead of sending null.
+  resultData: z
+    .partialRecord(DetectionKind, DetectionResult)
+    .nullish()
+    .transform((v) => v ?? null),
   // The backend omits this field for successful scans, so accept missing as well as null.
   errorMessage: z
     .string()
     .nullish()
     .transform((v) => v ?? null),
   createdAt: z.string(),
-  completedAt: z.string().nullable(),
+  completedAt: z
+    .string()
+    .nullish()
+    .transform((v) => v ?? null),
   chunks: z.array(ScanChunkSchema).optional(),
 });
 export type ScanResponse = z.infer<typeof ScanResponseSchema>;
