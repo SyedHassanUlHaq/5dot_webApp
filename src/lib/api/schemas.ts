@@ -56,7 +56,11 @@ export const ScanResponseSchema = z.object({
   progress: z.number(),
   detections: z.partialRecord(DetectionKind, DetectionState),
   resultData: z.partialRecord(DetectionKind, DetectionResult).nullable(),
-  errorMessage: z.string().nullable(),
+  // The backend omits this field for successful scans, so accept missing as well as null.
+  errorMessage: z
+    .string()
+    .nullish()
+    .transform((v) => v ?? null),
   createdAt: z.string(),
   completedAt: z.string().nullable(),
   chunks: z.array(ScanChunkSchema).optional(),
@@ -68,16 +72,19 @@ const ScanHistoryEnvelope = z.object({
   total: z.number(),
   limit: z.number(),
   offset: z.number(),
-  hasMore: z.boolean(),
+  // Real responses omit hasMore; derive it from the paging numbers when it is missing.
+  hasMore: z.boolean().optional(),
 });
-export type ScanHistory = z.infer<typeof ScanHistoryEnvelope>;
+export type ScanHistory = Omit<z.infer<typeof ScanHistoryEnvelope>, 'hasMore'> & {
+  hasMore: boolean;
+};
 /** The endpoint's schema wasn't published when mobile shipped; mobile tolerates a bare array, so do we. */
 export const ScanHistorySchema = z
   .union([ScanHistoryEnvelope, z.array(ScanResponseSchema)])
   .transform((d): ScanHistory =>
     Array.isArray(d)
       ? { items: d, total: d.length, limit: d.length, offset: 0, hasMore: false }
-      : d,
+      : { ...d, hasMore: d.hasMore ?? d.offset + d.items.length < d.total },
   );
 
 export const TrendingItemSchema = z.object({
@@ -128,14 +135,16 @@ export const NotificationSchema = z.object({
   createdAt: z.string(),
 });
 export type AppNotification = z.infer<typeof NotificationSchema>;
-export const NotificationListSchema = z.object({
-  items: z.array(NotificationSchema),
-  total: z.number(),
-  unread: z.number(),
-  page: z.number(),
-  limit: z.number(),
-  hasMore: z.boolean(),
-});
+export const NotificationListSchema = z
+  .object({
+    items: z.array(NotificationSchema),
+    total: z.number(),
+    unread: z.number(),
+    page: z.number(),
+    limit: z.number(),
+    hasMore: z.boolean().optional(),
+  })
+  .transform((d) => ({ ...d, hasMore: d.hasMore ?? d.page * d.limit < d.total }));
 
 export const FeedbackResponseSchema = z.object({ feedbackId: z.string(), message: z.string() });
 export type Plan = z.infer<typeof PlanSchema>;
