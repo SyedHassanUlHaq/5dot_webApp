@@ -53,7 +53,7 @@ export default function SignUpPage() {
   return (
     <>
       <h1 className="text-h1 font-bold">Create your account.</h1>
-      <p className="mt-1 mb-6 text-ink-2">50 free analyses every month. No card required.</p>
+      <p className="mt-1 mb-6 text-ink-2">20 free analyses every month. No card required.</p>
       <form onSubmit={onSubmit} noValidate className="space-y-4">
         <div className="grid grid-cols-2 gap-3">
           <Input

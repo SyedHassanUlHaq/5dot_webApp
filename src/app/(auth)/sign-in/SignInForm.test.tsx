@@ -24,7 +24,7 @@ const user = {
   plan: 'free',
   modelVersion: 'x',
   scansUsedThisMonth: 0,
-  scansLimitThisMonth: 50,
+  scansLimitThisMonth: 20,
   planResetDate: 'd',
   createdAt: 'd',
 };

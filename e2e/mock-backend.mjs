@@ -15,7 +15,7 @@ const user = {
   plan: 'free',
   modelVersion: 'mock-1',
   scansUsedThisMonth: 3,
-  scansLimitThisMonth: 50,
+  scansLimitThisMonth: 20,
   planResetDate: '2026-12-01T00:00:00Z',
   createdAt: '2026-01-01T00:00:00Z',
 };
@@ -145,7 +145,7 @@ const server = createServer(async (req, res) => {
           price: 0,
           currency: 'USD',
           billingPeriod: 'forever',
-          scansPerMonth: 50,
+          scansPerMonth: 20,
           features: ['Audio + video AI detection'],
           priorityQueue: false,
           apiAccess: false,

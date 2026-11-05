@@ -4,7 +4,7 @@
 “Payments coming soon” dialog and never fake a success. `NEXT_PUBLIC_BILLING_ENABLED` is `false`; `src/lib/billing.ts` contains
 one clearly named stub, `startCheckout()`, to replace when the backend exists.
 
-Plans today (from the live `GET /plans`): **Free** $0 / 50 analyses · **Pro** $9/month, 7-day trial, 500 analyses · **Team** $24/month (contact sales in-app).
+Plans today (from the live `GET /plans`): **Free** $0 / 20 analyses · **Pro** $9/month, 7-day trial, 500 analyses · **Team** $24/month (contact sales in-app).
 
 ## Design
 
