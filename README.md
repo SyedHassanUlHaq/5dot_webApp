@@ -49,3 +49,4 @@ docker run -p 3000:3000 -e TRUSTED_PROXY_HOPS=1 5dot-webapp
 Tokens live in httpOnly cookies behind a thin BFF (`/api/auth/*`, `/api/proxy/*`); browser JS never sees the refresh token. Mutating routes check `Origin`,
 auth routes are rate-limited, every page has a nonce-based CSP, and nothing logs tokens or personal data. The one exception, a short-lived access token handed to
 the browser so large files can upload directly to the backend, is documented in [docs/auth.md](docs/auth.md).
+# 5dot_webApp
