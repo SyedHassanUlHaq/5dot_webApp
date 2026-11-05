@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { OfflineBanner } from '@/components/OfflineBanner';
+import { PatternBackground } from '@/components/PatternBackground';
 import { cn } from '@/lib/cn';
 import { useMe, useSignOut } from '@/lib/auth/session';
 
@@ -28,7 +29,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const signOut = useSignOut();
 
   return (
-    <div className="min-h-dvh md:grid md:grid-cols-[240px_1fr]">
+    <div className="relative isolate min-h-dvh overflow-x-clip md:grid md:grid-cols-[240px_1fr]">
+      <PatternBackground />
       <OfflineBanner />
       <a
         href="#main"

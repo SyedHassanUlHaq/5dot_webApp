@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { ApiError, parseApiError } from '@/lib/api/errors';
 import { apiRequest, authRequest } from '@/lib/api/client';
-import { ScanResponseSchema, type DetectionKind, type ScanResponse } from '@/lib/api/schemas';
+import { ScanCreatedSchema, type DetectionKind, type ScanResponse } from '@/lib/api/schemas';
 import { DETECTION_KINDS, DETECTION_META } from './meta';
 
 function buildForm(kinds: DetectionKind[], extra: { file?: File; url?: string }): FormData {
@@ -17,7 +17,7 @@ function buildForm(kinds: DetectionKind[], extra: { file?: File; url?: string })
 
 /** URL scans are tiny → through the BFF proxy. */
 export function submitScanUrl(url: string, kinds: DetectionKind[]): Promise<ScanResponse> {
-  return apiRequest('scans', ScanResponseSchema, {
+  return apiRequest('scans', ScanCreatedSchema, {
     method: 'POST',
     body: buildForm(kinds, { url }),
   });
@@ -73,7 +73,7 @@ export function uploadScanFile(
       xhr.onload = async () => {
         const res = new Response(xhr.responseText, { status: xhr.status });
         if (xhr.status >= 200 && xhr.status < 300) {
-          const parsed = ScanResponseSchema.safeParse(JSON.parse(xhr.responseText || 'null'));
+          const parsed = ScanCreatedSchema.safeParse(JSON.parse(xhr.responseText || 'null'));
           return parsed.success
             ? resolve(parsed.data)
             : reject(new ApiError('BAD_RESPONSE', 'Unexpected response from the server.', 502));

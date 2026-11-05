@@ -15,7 +15,15 @@ export async function apiRequest<S extends z.ZodType>(
 
 /** Logs only field paths and issue codes (never values) so a schema mismatch is diagnosable from the console. */
 function badResponse(where: string, error: z.ZodError): ApiError {
-  const issues = error.issues.slice(0, 5).map((i) => `${i.path.join('.') || '(root)'}: ${i.code}`);
+  // Unions report only "invalid_union" at the root; flatten each branch's issues so the failing field is visible.
+  const flat = (issues: readonly z.core.$ZodIssue[], prefix: string[] = []): string[] =>
+    issues.flatMap((i) => {
+      const path = [...prefix, ...i.path.map(String)];
+      return i.code === 'invalid_union'
+        ? i.errors.flatMap((branch) => flat(branch, path))
+        : [`${path.join('.') || '(root)'}: ${i.code}`];
+    });
+  const issues = [...new Set(flat(error.issues))].slice(0, 8);
   console.warn(`[api] unexpected response shape from ${where}`, issues);
   return new ApiError('BAD_RESPONSE', 'Unexpected response from the server.', 502);
 }

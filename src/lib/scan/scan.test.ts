@@ -174,3 +174,42 @@ describe('format + validate', () => {
     expect(validateUrl('not a url')).not.toBeNull();
   });
 });
+
+describe('ScanHistorySchema with failed detections', () => {
+  it('accepts resultData entries that carry an error instead of a score', async () => {
+    const { ScanHistorySchema } = await import('@/lib/api/schemas');
+    const r = ScanHistorySchema.parse({
+      total: 1,
+      offset: 0,
+      limit: 20,
+      items: [
+        {
+          requestId: 'a',
+          filename: 'IMG_7485.MOV',
+          status: 'failed',
+          progress: 100,
+          detections: { ai_video: { requested: true, status: 'failed' } },
+          resultData: { ai_video: { error: 'max_workers must be greater than 0' } },
+          createdAt: '2026-09-08T13:53:30.918026+00:00',
+          completedAt: '2026-09-08T13:53:31.480275+00:00',
+        },
+      ],
+    });
+    expect(r.items).toHaveLength(1);
+    expect(summarizeScan(r.items[0]!).detections[0]?.scorePct).toBeNull();
+  });
+});
+
+describe('ScanCreatedSchema (POST /scans response)', () => {
+  it('accepts the minimal queued response', async () => {
+    const { ScanCreatedSchema } = await import('@/lib/api/schemas');
+    const r = ScanCreatedSchema.parse({
+      requestId: '4dd5f983-c24b-418f-ab52-ddc864046c3a',
+      status: 'processing',
+      createdAt: '2026-11-05T02:07:16.955434+00:00',
+    });
+    expect(r.status).toBe('processing');
+    expect(r.filename).toBe('');
+    expect(r.detections).toEqual({});
+  });
+});

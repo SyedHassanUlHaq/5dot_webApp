@@ -36,7 +36,11 @@ const DetectionState = z.object({
   requested: z.boolean(),
   status: z.enum(['pending', 'processing', 'complete', 'failed']),
 });
-const DetectionResult = z.object({ score: z.number(), threshold: z.number() });
+// A failed detection reports `{ error: "..." }` instead of a score; treat it as "no result".
+const DetectionResult = z.union([
+  z.object({ score: z.number(), threshold: z.number() }),
+  z.object({ error: z.string() }).transform(() => undefined),
+]);
 
 export const ScanChunkSchema = z.object({
   chunkIndex: z.number(),
@@ -79,6 +83,14 @@ export const ScanResponseSchema = z.object({
   chunks: z.array(ScanChunkSchema).optional(),
 });
 export type ScanResponse = z.infer<typeof ScanResponseSchema>;
+
+/** POST /scans answers with only { requestId, status, createdAt }; the first poll fills in filename, detections, etc. */
+export const ScanCreatedSchema = ScanResponseSchema.extend({
+  filename: z
+    .string()
+    .nullish()
+    .transform((v) => safeDecodeFilename(v ?? '')),
+});
 
 const ScanHistoryEnvelope = z.object({
   items: z.array(ScanResponseSchema),

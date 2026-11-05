@@ -100,7 +100,7 @@ describe('PlanCard', () => {
         name="Free"
         price="$0"
         period="forever"
-        scanLimit="50"
+        scanLimit="20 analyses / month"
         features={[]}
         ctaLabel="Current plan"
         disabled
